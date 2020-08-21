@@ -1,0 +1,45 @@
+---
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+pacman::p_load(tidyverse) 
+dat <- read_csv(here::here("data/clean_data.csv"))
+glimpse(dat)
+```
+
+# Exploración visual 
+
+```{r echo=FALSE}
+dat %>% 
+  ggplot(aes(x=fecha_siembra, y=rendimiento_qq_ha))+
+  geom_point(alpha =0.5, pch = 21)+
+  facet_wrap("regional")+
+  # geom_smooth()+
+  scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+## Variedades
+
+```{r}
+dat %>%   
+  mutate(variedad = str_squish(str_to_upper( gsub(',', '\\.', variedad)))) %>% 
+  arrange(variedad) %>% 
+  pull(`variedad`) %>% 
+  unique() 
+```
+
+```{r, eval=FALSE}
+dat %>% 
+  ggplot(aes(x=variedad, y=rendimiento_qq_ha))+
+  geom_point()+
+  # facet_wrap("regional")+
+  # geom_smooth()+
+  # scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+```
+
