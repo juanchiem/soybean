@@ -21,4 +21,15 @@ dat <- dat %>%
 dat %>% arrange(regional) %>% 
   pull(`regional`) %>% unique() 
 
+dat <- read_csv(here::here("data/clean_data.csv"))
+
+
+dat %>%   
+  mutate(variedad = str_squish(str_to_upper( gsub(',', '\\.', variedad)))) %>% 
+  arrange(variedad) %>% 
+  pull(`variedad`) %>% 
+  unique() 
+
+# dat %>% group_by(variedad) %>% tally()
+
 write_csv(dat, "clean_data.csv")
