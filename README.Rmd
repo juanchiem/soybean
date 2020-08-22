@@ -11,6 +11,10 @@ knitr::opts_chunk$set(
 )
 ```
 
+Algunas referencias para tener en cuenta: 
+
+[Revista Horizonte digital](https://issuu.com/horizonteadigital/docs/ha_130)
+
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
 dat <- read_csv(here::here("data/clean_data.csv"))
@@ -32,8 +36,7 @@ dat %>%
   knitr::kable()
 ```
 
-
-## Fecha de siembra
+## Fecha de siembra x GM
 
 ```{r}
 pacman::p_load(scales, ggridges)
@@ -51,6 +54,8 @@ stat_density_ridges(aes(fill = grupo_de_madurez),
   facet_wrap("campana")+
   labs(x= "Fecha de siembra", y = "Zona agroecológica")
 ```
+
+## Fecha de siembra x rinde
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
@@ -75,9 +80,11 @@ dat %>%
 ```{r}
 dat %>%   
   mutate(variedad = str_squish(str_to_upper( gsub(',', '\\.', variedad)))) %>% 
-  arrange(variedad) %>% 
-  pull(`variedad`) %>% 
-  unique() 
+  group_by(grupo_de_madurez ,variedad) %>%
+  tally() %>% 
+  arrange(desc(n)) %>% 
+  # summarise(n_distinct(variedad)) %>% 
+  knitr::kable()
 
 ```
 
