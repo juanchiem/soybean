@@ -10,16 +10,47 @@ dat <- read_csv(here::here("data/clean_data.csv"))
 glimpse(dat)
 ```
 
-# Exploración visual 
+Cantidad de datos faltantes por variable:
 
-```{r echo=FALSE}
+```{r}
+dat %>%
+  select(everything()) %>%  # replace to your needs
+  summarise_all(funs(sum(is.na(.))))
+```
+## Fecha de siembra
+
+```{r}
+library(scales)
+
 dat %>% 
-  ggplot(aes(x=fecha_siembra, y=rendimiento_qq_ha))+
-  geom_point(alpha =0.5, pch = 21)+
-  facet_wrap("regional")+
-  # geom_smooth()+
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31') %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  stat_density_ridges(aes(fill = grupo_de_madurez), 
+                      scale = .95, alpha =0.7, 
+                      # quantile_lines = TRUE, quantiles = 2
+                      )+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  facet_wrap("campana")
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31') %>%
+  filter(!is.na(rinde)) %>% 
+  filter(!(cultivo == 'Soja 2°' & zona ==1 & campana =="2018/19")) %>%
+  ggplot(aes(x=lubridate::ymd(fecha_siembra), y=rinde))+
+  geom_point(aes(col=campana), alpha =0.5, pch = 21)+
+  facet_grid(zona~ cultivo)+
+  geom_smooth(aes(col=campana), se = F, 
+              span = 1 
+              )+
   scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
 ```
 
 ## Variedades
@@ -30,6 +61,7 @@ dat %>%
   arrange(variedad) %>% 
   pull(`variedad`) %>% 
   unique() 
+
 ```
 
 ```{r, eval=FALSE}
@@ -42,4 +74,5 @@ dat %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 ```
+
 

@@ -6,30 +6,89 @@ output: github_document
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = TRUE, echo = F, message=FALSE, warning=FALSE, 
   comment = "#>"
 )
 ```
 
-# soybean
-
-<!-- badges: start -->
-<!-- badges: end -->
-
-The goal of soybean is to ...
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
+```{r message=FALSE, warning=FALSE, include=FALSE}
+pacman::p_load(tidyverse) 
+dat <- read_csv(here::here("data/clean_data.csv"))
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+## Dataset 
 
-You can also embed plots, for example:
+```{r}
+glimpse(dat)
 
-```{r pressure, echo = FALSE}
-plot(pressure)
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+### Cantidad de datos faltantes por variable:
+
+```{r}
+dat %>%
+  select(everything()) %>%  # replace to your needs
+  summarise_all(funs(sum(is.na(.)))) %>% 
+  knitr::kable()
+```
+
+
+## Fecha de siembra
+
+```{r}
+pacman::p_load(scales, ggridges)
+
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31') %>%
+  ggplot(aes(x = fecha_siembra, y = factor(zona))) +
+stat_density_ridges(aes(fill = grupo_de_madurez), 
+                      scale = .95, alpha =0.7, 
+                      # quantile_lines = TRUE, quantiles = 2
+                      )+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  facet_wrap("campana")+
+  labs(x= "Fecha de siembra", y = "Zona agroecológica")
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31') %>%
+  filter(!is.na(rinde)) %>% 
+  filter(!(cultivo == 'Soja 2°' & zona ==1 & campana =="2018/19")) %>%
+  ggplot(aes(x=lubridate::ymd(fecha_siembra), y=rinde))+
+  geom_point(aes(col=campana), alpha =0.5, pch = 21)+
+  facet_grid(zona~ cultivo)+
+  geom_smooth(aes(col=campana), se = F, 
+              span = 1 
+              )+
+  scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
+```
+
+## Variedades
+
+```{r}
+dat %>%   
+  mutate(variedad = str_squish(str_to_upper( gsub(',', '\\.', variedad)))) %>% 
+  arrange(variedad) %>% 
+  pull(`variedad`) %>% 
+  unique() 
+
+```
+
+```{r, eval=FALSE}
+dat %>% 
+  ggplot(aes(x=variedad, y=rendimiento_qq_ha))+
+  geom_point()+
+  # facet_wrap("regional")+
+  # geom_smooth()+
+  # scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+```
+

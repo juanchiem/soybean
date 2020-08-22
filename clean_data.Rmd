@@ -1,0 +1,94 @@
+---
+title: "Limpieza dataset"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+pacman::p_load(tidyverse) 
+
+raw_dat <- readxl::read_excel(here::here("data", "Planilla soja Nodo Oeste - Juanchi.xlsx"),
+                   .name_repair = janitor::make_clean_names) 
+ 
+glimpse(raw_dat)
+```
+
+```{r}
+dat <- raw_dat %>% 
+  select(campana, zona, regional, localidad, clase_de_suelo, cultivo, rinde = rendimiento_qq_ha,
+         antecesor_invernal_18_1, 
+         antecesor_estival_17_18, fecha_siembra =fecha_de_siembra_dia_mes, variedad, grupo_de_madurez, 
+         espaciamiento_cm, densidad, riego, napa, 
+         adversidad_1, dano_1 = percent_estimados_de_dano, adversidad_2, dano_2 = percent_estimados_de_dano1) %>% 
+  filter(rinde > 10) %>%
+  mutate(zona = replace_na(zona, '3'), 
+         fecha_siembra = lubridate::ymd(fecha_siembra), 
+         dano_1 = replace_na(dano_1, '0'), 
+         dano_2 = replace_na(dano_2, '0'))
+str(dat)
+
+glimpse(dat)
+```
+
+```{r}
+dat %>%
+  select(everything()) %>%  # replace to your needs
+  summarise_all(funs(sum(is.na(.))))
+```
+
+- Regional
+
+```{r}
+raw_dat %>% 
+  arrange(regional) %>%
+  pull(regional) %>% unique()
+```
+ 
+
+```{r}
+dat <- dat %>%
+  mutate(regional = str_trim(string = regional),
+         regional = str_to_title(regional), # capital letters
+         regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
+         regional = recode(regional,  # cambios manuales
+                           'Vicuna Mackenna'= 'V. Mackenna',
+                           Montecristo = "Monte Cristo",
+                           "Los Surgentes Inriville" = "Los Surgentes-Inriville",
+                           "Los Surgentes" = "Los Surgentes-Inriville"))
+dat %>% arrange(regional) %>% pull(`regional`) %>% unique()
+```
+
+```{r}
+str(dat)
+```
+
+
+- Localidad
+
+```{r}
+dat %>% arrange(localidad) %>% pull(localidad) %>% unique()
+
+dat <- dat %>%
+  mutate(localidad = str_to_title(localidad), # capital letters
+         localidad = stringi::stri_trans_general(localidad,"Latin-ASCII"))  
+
+dat %>% arrange(localidad) %>% pull(localidad) %>% unique()
+```
+
+- Fecha siembra
+
+```{r}
+dat %>% select(campana, fecha_siembra)
+
+dat <- dat %>% 
+  mutate(season = campana) %>% 
+  separate(campana, c("y_siembra","y_cosecha"), "/") %>%   
+  mutate(y_cosecha = as.numeric(y_cosecha)+2000, 
+         # fecha_siembra = format(fecha_siembra, "%d-%m"),
+         siembra = if_else(fecha_siembra>2018-09-01, fecha ))  
+```
+
+```{r}
+write_csv(dat, "data/clean_data.csv")
+```
