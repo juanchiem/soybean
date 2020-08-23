@@ -36,8 +36,6 @@ dat <- dat %>%
 dat <- dat %>%
   mutate(fecha_siembra = lubridate::ymd(fecha_de_siembra_dia_mes))
 
-
-
 dat <- read_csv(here::here("data/clean_data.csv"))
 glimpse(dat)
 

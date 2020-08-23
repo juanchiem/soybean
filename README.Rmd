@@ -17,7 +17,9 @@ Algunas referencias para tener en cuenta:
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
-dat <- read_csv(here::here("data/clean_data.csv"))
+# dat <- read_csv(here::here("data/clean_data.csv"))
+load(here::here("soy_dat.Rdata"))
+
 ```
 
 ## Dataset 
@@ -45,7 +47,7 @@ dat %>%
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31') %>%
   ggplot(aes(x = fecha_siembra, y = factor(zona))) +
-stat_density_ridges(aes(fill = grupo_de_madurez), 
+stat_density_ridges(aes(fill = GM), 
                       scale = .95, alpha =0.7, 
                       # quantile_lines = TRUE, quantiles = 2
                       )+
@@ -63,7 +65,7 @@ dat %>%
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31') %>%
   filter(!is.na(rinde)) %>% 
-  filter(!(cultivo == 'Soja 2°' & zona ==1 & campana =="2018/19")) %>%
+  filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
   ggplot(aes(x=lubridate::ymd(fecha_siembra), y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, pch = 21)+
   facet_grid(zona~ cultivo)+
@@ -78,24 +80,54 @@ dat %>%
 ## Variedades
 
 ```{r}
-dat %>%   
-  mutate(variedad = str_squish(str_to_upper( gsub(',', '\\.', variedad)))) %>% 
-  group_by(grupo_de_madurez ,variedad) %>%
-  tally() %>% 
-  arrange(desc(n)) %>% 
-  # summarise(n_distinct(variedad)) %>% 
-  knitr::kable()
-
-```
-
-```{r, eval=FALSE}
 dat %>% 
-  ggplot(aes(x=variedad, y=rendimiento_qq_ha))+
-  geom_point()+
-  # facet_wrap("regional")+
-  # geom_smooth()+
-  # scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
-
+  group_by(variedad) %>%
+  tally() %>% 
+  arrange(desc(n)) #%>% 
+  # knitr::kable()
 ```
 
+```{r}
+dat %>%  
+  filter(variedad %in% var_name, 
+         dano_tot == 0, 
+         rinde > 5, 
+         # cultivo == 'soja_1', 
+         riego == "NO") %>% 
+  count(campana, variedad) %>% 
+  arrange(n) %>% 
+  filter(n>4) %>% 
+  mutate(id = paste0(campana, "-",variedad)) %>% 
+  pull(id) %>% unique() ->var_secano
+```
+
+### Soja 1° 
+
+```{r fig.height=10}
+#http://stulp.gmw.rug.nl/ggplotworkshop/comparinggroupstatistics.html 
+dat %>%  
+  mutate(id = paste0(campana, "-",variedad)) %>% 
+  filter(id %in% var_secano, 
+         cultivo == 'soja_1') %>%
+  ggplot(aes(x=reorder(factor(variedad), rinde, FUN=median),
+             y=rinde))+
+  facet_grid(GM ~ campana,  scales="free", switch="y")  +
+  coord_flip()+
+  stat_summary(fun="mean", geom="point", size=2)+
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
+```
+
+### Soja 2°
+
+```{r fig.height=10}
+dat %>%  
+  mutate(id = paste0(campana, "-",variedad)) %>% 
+  filter(id %in% var_secano, 
+         cultivo == 'soja_2') %>%
+  ggplot(aes(x=reorder(factor(variedad), rinde, FUN=median),
+             y=rinde))+
+  facet_grid(GM ~ campana,  scales="free", switch="y")  +
+  coord_flip()+
+  stat_summary(fun="mean", geom="point", size=2)+
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
+```
