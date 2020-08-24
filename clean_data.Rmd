@@ -6,29 +6,40 @@ editor_options:
 ---
 
 https://evamaerey.github.io/little_flipbooks_library/data_cleaning/data_cleaning#74 
-
 https://www.gastonsanchez.com/r4strings/cleaning.html
 
 ```{r}
-pacman::p_load(tidyverse) 
+pacman::p_load(tidyverse)
+```
 
+
+```{r}
 raw_dat <- readxl::read_excel(here::here("data", "Planilla soja Nodo Oeste - Juanchi.xlsx"),
-                   .name_repair = janitor::make_clean_names) 
- 
+                   .name_repair = janitor::make_clean_names)
+```
+
+
+```{r}
 glimpse(raw_dat)
+```
+
+
+```{r}
+# dat_git <- read_csv("https://raw.githubusercontent.com/juanchiem/soybean/master/data/clean_data.csv")
 ```
 
 ```{r}
 dat <- raw_dat %>% 
-  select(campana, zona, regional, localidad, clase_de_suelo, cultivo, 
+  select(campana, zona, regional, localidad, clase_de_suelo, cultivo, superficie, 
          rinde = rendimiento_qq_ha,
          antecesor_invernal_18_1, 
          antecesor_estival_17_18, fecha_siembra =fecha_de_siembra_dia_mes, variedad, 
-         GM = grupo_de_madurez, 
+         GM = grupo_de_madurez, semillero, 
          espaciamiento_cm, densidad, riego, napa, 
          adversidad_1, dano_1 = percent_estimados_de_dano, adversidad_2, 
          dano_2 = percent_estimados_de_dano1) %>% 
   # filter(rinde > 10) %>%
+  
   mutate(zona = replace_na(zona, '3'), 
          fecha_siembra = lubridate::ymd(fecha_siembra), 
          GM = str_squish(str_to_upper(gsub(',', '\\.', GM))), 
@@ -38,13 +49,28 @@ dat <- raw_dat %>%
          cultivo = recode(cultivo,  # cambios manuales
                            'Soja 1°'= 'soja_1',
                            'Soja 2°'= 'soja_2')) %>% 
+  
+  mutate(regional = str_trim(string = regional),
+         regional = str_to_title(regional), # capital letters
+         regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
+         regional = recode(regional,  # cambios manuales
+                           'Vicuna Mackenna'= 'V. Mackenna',
+                           Montecristo = "Monte Cristo",
+                           "Los Surgentes Inriville" = "Los Surgentes-Inriville",
+                           "Los Surgentes" = "Los Surgentes-Inriville")) %>% 
    mutate(
     variedad = stringi::stri_trans_general(variedad,"Latin-ASCII"),
     variedad = str_replace_all(variedad, c('STS|IPRO'), ""),
     variedad = str_to_upper(gsub(',', '\\.', variedad)),
     variedad = str_replace_all(variedad, pattern=" ", repl="")) %>% 
-  mutate(riego = str_to_upper(gsub(',', '\\.', riego)))
   
+  mutate(riego = str_to_upper(gsub(',', '\\.', riego))) %>% 
+  
+  mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
+  mutate(id_row = 1:nrow(.))
+```
+
+```{r}
 str(dat)
 glimpse(dat)
 ```
@@ -63,14 +89,14 @@ dat %>%
 #   pull(regional) %>% unique()
 
 dat <- dat %>%
-  mutate(regional = str_trim(string = regional),
-         regional = str_to_title(regional), # capital letters
-         regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
-         regional = recode(regional,  # cambios manuales
-                           'Vicuna Mackenna'= 'V. Mackenna',
-                           Montecristo = "Monte Cristo",
-                           "Los Surgentes Inriville" = "Los Surgentes-Inriville",
-                           "Los Surgentes" = "Los Surgentes-Inriville"))
+  # mutate(regional = str_trim(string = regional),
+  #        regional = str_to_title(regional), # capital letters
+  #        regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
+  #        regional = recode(regional,  # cambios manuales
+  #                          'Vicuna Mackenna'= 'V. Mackenna',
+  #                          Montecristo = "Monte Cristo",
+  #                          "Los Surgentes Inriville" = "Los Surgentes-Inriville",
+  #                          "Los Surgentes" = "Los Surgentes-Inriville"))
 # dat %>% arrange(regional) %>% pull(`regional`) %>% unique()
 ```
 
@@ -91,33 +117,34 @@ dat %>% arrange(localidad) %>% pull(localidad) %>% unique()
 ```{r}
 # dat %>% select(campana, fecha_siembra)
 
-dat <- dat %>% 
-  mutate(season = campana) %>% 
-  separate(campana, c("y_siembra","y_cosecha"), "/") %>%   
-  mutate(y_cosecha = as.numeric(y_cosecha)+2000, 
-         # fecha_siembra = format(fecha_siembra, "%d-%m"),
-         siembra = if_else(fecha_siembra>2018-09-01, fecha ))  
+# dat <- dat %>% 
+#   mutate(season = campana) %>% 
+#   separate(campana, c("y_siembra","y_cosecha"), "/") %>%   
+#   mutate(y_cosecha = as.numeric(y_cosecha)+2000, 
+#          # fecha_siembra = format(fecha_siembra, "%d-%m"),
+#          siembra = if_else(fecha_siembra>2018-09-01, fecha ))  
 ```
 
 - Variedad
 
 ```{r}
+# https://niderasemillas.com.ar/cultivos/soja
+# https://www.donmario.com/catalogo-soja-maiz-trigo/#soja
+# https://agriculture.basf.com/ar/es/proteccion-de-cultivos-y-semillas/productos/credenz.html
+
+var_aislados <- dat %>%
+  group_by(variedad) %>%
+  filter(n()==1) %>% ungroup() %>% 
+  arrange(variedad) %>% 
+  pull(variedad) %>% unique() 
+var_aislados
+
 var_name <- dat %>%
   group_by(variedad) %>%
   filter(n()>1) %>% ungroup() %>% 
-  mutate(
-    variedad = stringi::stri_trans_general(variedad,"Latin-ASCII"),
-    variedad = str_replace_all(variedad, c('STS|IPRO'), ""),
-    variedad = str_to_upper(gsub(',', '\\.', variedad)),
-    variedad = str_replace_all(variedad, pattern=" ", repl="")
-    # variedad = recode(variedad,  
-         #                   N5009= NA5009,
-         #                   N5009= NA5009)
-         ) %>% 
   arrange(variedad) %>% 
-  filter(!variedad %in% c(NA, "OTRO", "VARIAS", "EXPERIMENTAL", "MEZCLA","0")) %>% 
+  filter(!variedad %in% c(NA, "OTRO", "OTRA", "VARIAS", "EXPERIMENTAL", "MEZCLA","0")) %>%
   pull(variedad) %>% unique() 
-
 var_name
 
 dat %>% 
@@ -125,10 +152,9 @@ dat %>%
   group_by(variedad) %>%
   filter(n()>1) %>% ungroup() %>%
     pull(variedad) %>% unique() 
-#64 variedades 
 ```
 
 ```{r}
 save(raw_dat, dat, var_name, file = here::here("soy_dat.Rdata"))
-write_csv(dat, "data/clean_data.csv")
+# write_csv(dat_git, "data/clean_data.csv")
 ```

@@ -1,8 +1,10 @@
 ---
 output: github_document
+always_allow_html: true
+editor_options: 
+  chunk_output_type: console
+  
 ---
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -15,30 +17,82 @@ Algunas referencias para tener en cuenta:
 
 [Revista Horizonte digital](https://issuu.com/horizonteadigital/docs/ha_130)
 
+
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
 # dat <- read_csv(here::here("data/clean_data.csv"))
 load(here::here("soy_dat.Rdata"))
-
 ```
 
 ## Dataset 
 
 ```{r}
 glimpse(dat)
-
 ```
 
-### Cantidad de datos faltantes por variable:
+- Nro de observaciones por campaña / ecoregión / regional
 
 ```{r}
-dat %>%
-  select(everything()) %>%  # replace to your needs
-  summarise_all(funs(sum(is.na(.)))) %>% 
+dat %>% 
+  group_by(campana, zona, regional) %>% 
+  tally() %>% 
   knitr::kable()
 ```
 
+- Cantidad de datos faltantes por variable
+
+```{r}
+dat %>%
+  summarise_all(funs(sum(!is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "datos") %>% 
+  left_join(by="variable", 
+            dat %>%
+    summarise_all(funs(sum(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "datos_faltantes") 
+  ) %>% 
+  knitr::kable()
+```
+
+## Superficie (tamaño de cuadrados) y rendimientos (intensidad de color) por GM 
+
+```{r}
+library(treemap)
+
+dat_sum <- dat %>% 
+  group_by(cultivo, GM, variedad) %>%
+  summarise(var_lotes= n(), 
+            var_sup = sum(superficie, na.rm = TRUE),
+            rinde_medio = median(rinde, na.rm = TRUE))
+# dat_sum
+```
+
+
+```{r}
+treemap(dat_sum %>% filter(cultivo =="soja_1"),
+        index=c("GM", "variedad"),
+        vSize="var_sup",
+        vColor="rinde_medio",
+        type = "value",
+        title="Soja de 1° - Uso de variedades por grupo de madurez",
+        title.legend = "Rendimiento medio (qq/ha)"
+)
+```
+
+```{r}
+treemap(dat_sum %>% filter(cultivo =="soja_2"),
+        index = c("GM", "variedad"),
+        vSize = "var_sup",
+        vColor = "rinde_medio",
+        type = "value",
+        title = "Soja de 2° - Uso de variedades por grupo de madurez",
+        title.legend = "Rendimiento medio (qq/ha)"
+)
+```
+
+
 ## Fecha de siembra x GM
+
+- Evolución de fecha de siembra por zona
 
 ```{r}
 pacman::p_load(scales, ggridges)
@@ -47,10 +101,10 @@ dat %>%
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31') %>%
   ggplot(aes(x = fecha_siembra, y = factor(zona))) +
-stat_density_ridges(aes(fill = GM), 
+  stat_density_ridges(aes(fill = GM), 
                       scale = .95, alpha =0.7, 
                       # quantile_lines = TRUE, quantiles = 2
-                      )+
+  )+
   scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
   facet_wrap("campana")+
@@ -59,6 +113,7 @@ stat_density_ridges(aes(fill = GM),
 
 ## Fecha de siembra x rinde
 
+- Rendimientos por fecha de siembra x zona
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 dat %>% 
@@ -66,7 +121,7 @@ dat %>%
          fecha_siembra < '2018-12-31') %>%
   filter(!is.na(rinde)) %>% 
   filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
-  ggplot(aes(x=lubridate::ymd(fecha_siembra), y=rinde))+
+  ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, pch = 21)+
   facet_grid(zona~ cultivo)+
   geom_smooth(aes(col=campana), se = F, 
@@ -76,6 +131,8 @@ dat %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
 ```
+
+- Tomar las 5 variedades mas sembradas de cada GM y ver distribucion de rendimientos (por zona, para no meter ruido del potencial de las mismas??
 
 ## Variedades
 
@@ -92,13 +149,12 @@ dat %>%
   filter(variedad %in% var_name, 
          dano_tot == 0, 
          rinde > 5, 
-         # cultivo == 'soja_1', 
          riego == "NO") %>% 
   count(campana, variedad) %>% 
   arrange(n) %>% 
-  filter(n>4) %>% 
+  filter(n>4) %>%   
   mutate(id = paste0(campana, "-",variedad)) %>% 
-  pull(id) %>% unique() ->var_secano
+  pull(id) %>% unique() -> var_secano
 ```
 
 ### Soja 1° 
@@ -108,8 +164,11 @@ dat %>%
 dat %>%  
   mutate(id = paste0(campana, "-",variedad)) %>% 
   filter(id %in% var_secano, 
-         cultivo == 'soja_1') %>%
-  ggplot(aes(x=reorder(factor(variedad), rinde, FUN=median),
+         # GM %in% c("IV","V"),
+         cultivo == 'soja_1') %>% 
+  ggplot(aes(
+    x=variedad,
+    # x=reorder(factor(variedad), rinde, FUN=median),
              y=rinde))+
   facet_grid(GM ~ campana,  scales="free", switch="y")  +
   coord_flip()+
@@ -131,3 +190,11 @@ dat %>%
   stat_summary(fun="mean", geom="point", size=2)+
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
 ```
+
+- Analisis de evolucion de uso de biotecnologia por campaña
+
+
+
+- Analisis de efecto napa y agua a la siembra por año y por zona
+
+- Arbol de regresion para rendimiento: que variables explican cada rango de rendimiento??
