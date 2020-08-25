@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-Algunas referencias para tener en cuenta: 
+Referencias para tener en cuenta: 
 
 [Revista Horizonte digital](https://issuu.com/horizonteadigital/docs/ha_130)
 
@@ -35,11 +35,25 @@ glimpse(dat)
 ```{r}
 dat %>% 
   group_by(campana, zona, regional) %>% 
-  tally() %>% 
-  knitr::kable()
+  tally() %>% ungroup() %>% 
+  mutate(campana = factor(campana),
+         campana = forcats::fct_rev(campana)) %>% 
+  ggplot(aes(
+    x =reorder(regional, n, sum),
+    y = n, fill = campana)) + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = n), position = position_stack(vjust = 0.5), size = 2)+
+  facet_grid(zona ~ .,  scales="free", space = "free")+
+  coord_flip()+
+  labs(x = "Regional", y = "Cantidad de lotes", fill = "")+
+  geom_text(
+    aes(x = reorder(regional, n, sum),
+        label = stat(y), group = regional),
+    stat = 'summary', fun = sum, 
+    vjust = 0.5, hjust=-.1, size = 3)
 ```
 
-- Cantidad de datos faltantes por variable
+- Cantidad de datos/faltantes por variable
 
 ```{r}
 dat %>%
@@ -53,7 +67,7 @@ dat %>%
   knitr::kable()
 ```
 
-## Superficie (tamaño de cuadrados) y rendimientos (intensidad de color) por GM 
+## Distribución de variedades: superficie (tamaño de cuadrados) y rendimientos (intensidad de color) por GM 
 
 ```{r}
 library(treemap)
@@ -89,7 +103,6 @@ treemap(dat_sum %>% filter(cultivo =="soja_2"),
 )
 ```
 
-
 ## Fecha de siembra x GM
 
 - Evolución de fecha de siembra por zona
@@ -119,28 +132,32 @@ dat %>%
 dat %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31') %>%
-  filter(!is.na(rinde)) %>% 
+  filter(!is.na(rinde)) %>%
+  filter(rinde>2) %>%
   filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
+  filter(!(cultivo == "soja_2" & fecha_siembra < '2018-12-01')) %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, pch = 21)+
-  facet_grid(zona~ cultivo)+
+  facet_grid(zona~ cultivo, scales="free")+
   geom_smooth(aes(col=campana), se = F, 
               span = 1 
               )+
-  scale_x_date(date_breaks = "1 month", date_labels =  "%b")+
+  scale_x_date(date_breaks = "10 day", date_labels =  "%d-%b")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
 ```
+
+> Obs: elimine siembras de soja 2° anteriores al 1/12. Algo similar habria que hacer respecto a las soja 1°: eliminar siembras posteriores a 15/12? 
 
 - Tomar las 5 variedades mas sembradas de cada GM y ver distribucion de rendimientos (por zona, para no meter ruido del potencial de las mismas??
 
 ## Variedades
 
-```{r}
+```{r, eval=FALSE}
 dat %>% 
-  group_by(variedad) %>%
+  group_by(GM, variedad) %>%
   tally() %>% 
-  arrange(desc(n)) #%>% 
+  arrange(GM, desc(n)) #%>% 
   # knitr::kable()
 ```
 
@@ -164,7 +181,7 @@ dat %>%
 dat %>%  
   mutate(id = paste0(campana, "-",variedad)) %>% 
   filter(id %in% var_secano, 
-         # GM %in% c("IV","V"),
+         GM %in% c("IV","V"),
          cultivo == 'soja_1') %>% 
   ggplot(aes(
     x=variedad,
@@ -191,10 +208,44 @@ dat %>%
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
 ```
 
-- Analisis de evolucion de uso de biotecnologia por campaña
+- Evolución de uso de biotecnologia por campaña
 
+```{r}
+bio_sum <- dat %>% 
+  group_by(
+    campana,
+    # variedad,
+    biotecnologia) %>% 
+  summarise(lotes = n(), 
+            area = sum(superficie)) %>% 
+  separate(campana, c("year",NA), "/") %>% 
+  ungroup()
 
+# gs4_auth()
+# sheet_write(bio_sum, ss = soja, sheet = "var_x_bio")
 
-- Analisis de efecto napa y agua a la siembra por año y por zona
+bio_sum %>% 
+  # filter(!biotecnologia %in%)
+  ggplot(aes(x = factor(year), 
+             y = area/1000, 
+             col = factor(biotecnologia), 
+             group =factor(biotecnologia)))+
+  geom_line(alpa =0.5)+
+  labs(x = NULL, col=NULL, y = "miles de has", 
+       title = "Evolucion de superficie de adopción de biotecnología")+
+  ggrepel::geom_text_repel(
+    data = bio_sum %>% filter(year == 2019),
+    aes(label = biotecnologia),
+    size =3
+  ) 
+```
+
+- Efecto napa y agua a la siembra por año y por zona
+
+```{r, eval=FALSE}
+dat %>% 
+  
+```
+
 
 - Arbol de regresion para rendimiento: que variables explican cada rango de rendimiento??

@@ -9,20 +9,21 @@ https://evamaerey.github.io/little_flipbooks_library/data_cleaning/data_cleaning
 https://www.gastonsanchez.com/r4strings/cleaning.html
 
 ```{r}
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse, googlesheets4)
 ```
 
 
 ```{r}
-raw_dat <- readxl::read_excel(here::here("data", "Planilla soja Nodo Oeste - Juanchi.xlsx"),
-                   .name_repair = janitor::make_clean_names)
-```
+# raw_dat <- readxl::read_excel(here::here("data", "soja_cba.xlsx"),
+#                    .name_repair = janitor::make_clean_names)
+# gs4_deauth()
+# gs4_auth()
+# soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
+# raw_dat <- read_sheet(soja)
+raw_dat <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit?usp=sharing")%>%   janitor::clean_names()
 
-
-```{r}
 glimpse(raw_dat)
 ```
-
 
 ```{r}
 # dat_git <- read_csv("https://raw.githubusercontent.com/juanchiem/soybean/master/data/clean_data.csv")
@@ -30,16 +31,20 @@ glimpse(raw_dat)
 
 ```{r}
 dat <- raw_dat %>% 
-  select(campana, zona, regional, localidad, clase_de_suelo, cultivo, superficie, 
+  select(campana, zona, regional, localidad, clase_de_suelo,
+         cultivo, superficie, 
          rinde = rendimiento_qq_ha,
          antecesor_invernal_18_1, 
-         antecesor_estival_17_18, fecha_siembra =fecha_de_siembra_dia_mes, variedad, 
+         antecesor_estival_17_18, 
+         fecha_siembra =fecha_de_siembra_dia_mes, 
+         variedad, biotecnologia,
          GM = grupo_de_madurez, semillero, 
-         espaciamiento_cm, densidad, riego, napa, 
-         adversidad_1, dano_1 = percent_estimados_de_dano, adversidad_2, 
+         espaciamiento_cm, densidad, 
+         riego, napa, agua_inicio=estado_del_perfil_a_la_siembra,  
+         adversidad_1, 
+         dano_1 = percent_estimados_de_dano, adversidad_2, 
          dano_2 = percent_estimados_de_dano1) %>% 
   # filter(rinde > 10) %>%
-  
   mutate(zona = replace_na(zona, '3'), 
          fecha_siembra = lubridate::ymd(fecha_siembra), 
          GM = str_squish(str_to_upper(gsub(',', '\\.', GM))), 
@@ -49,7 +54,6 @@ dat <- raw_dat %>%
          cultivo = recode(cultivo,  # cambios manuales
                            'Soja 1°'= 'soja_1',
                            'Soja 2°'= 'soja_2')) %>% 
-  
   mutate(regional = str_trim(string = regional),
          regional = str_to_title(regional), # capital letters
          regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
@@ -64,6 +68,13 @@ dat <- raw_dat %>%
     variedad = str_to_upper(gsub(',', '\\.', variedad)),
     variedad = str_replace_all(variedad, pattern=" ", repl="")) %>% 
   
+  mutate(
+    biotecnologia = str_to_upper(gsub(',', '\\.', biotecnologia)), 
+    biotecnologia = recode(biotecnologia,  # cambios manuales
+                           'STS + INTACTA'= 'INTACTA + STS',
+                           'RR1'= 'RR'), 
+    biotecnologia = str_replace_all(biotecnologia, c('INTACTA'), "IPRO"),
+) %>% 
   mutate(riego = str_to_upper(gsub(',', '\\.', riego))) %>% 
   
   mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
@@ -73,12 +84,6 @@ dat <- raw_dat %>%
 ```{r}
 str(dat)
 glimpse(dat)
-```
-
-```{r}
-dat %>%
-  select(everything()) %>%  # replace to your needs
-  summarise_all(funs(sum(is.na(.))))
 ```
 
 - Regional
@@ -131,6 +136,7 @@ dat %>% arrange(localidad) %>% pull(localidad) %>% unique()
 # https://niderasemillas.com.ar/cultivos/soja
 # https://www.donmario.com/catalogo-soja-maiz-trigo/#soja
 # https://agriculture.basf.com/ar/es/proteccion-de-cultivos-y-semillas/productos/credenz.html
+# https://nksemillas.com.ar/soja
 
 var_aislados <- dat %>%
   group_by(variedad) %>%
@@ -151,7 +157,7 @@ dat %>%
   filter(variedad %in% var_name) %>% 
   group_by(variedad) %>%
   filter(n()>1) %>% ungroup() %>%
-    pull(variedad) %>% unique() 
+  pull(variedad) %>% unique() 
 ```
 
 ```{r}
