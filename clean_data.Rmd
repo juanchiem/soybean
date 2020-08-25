@@ -16,12 +16,16 @@ pacman::p_load(tidyverse, googlesheets4)
 ```{r}
 # raw_dat <- readxl::read_excel(here::here("data", "soja_cba.xlsx"),
 #                    .name_repair = janitor::make_clean_names)
-# gs4_deauth()
-# gs4_auth()
-# soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
-# raw_dat <- read_sheet(soja)
+
 raw_dat <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit?usp=sharing")%>%   janitor::clean_names()
 
+gs4_auth()
+soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
+raw_dat <- read_sheet(soja, sheet = "raw", range = "A1:AT2708")
+raw_dat <- janitor::clean_names(raw_dat)
+```
+
+```{r}
 glimpse(raw_dat)
 ```
 
@@ -31,7 +35,8 @@ glimpse(raw_dat)
 
 ```{r}
 dat <- raw_dat %>% 
-  select(campana, zona, regional, localidad, clase_de_suelo,
+  select(id_lote, campana, zona, regional, localidad,
+         clase_de_suelo,
          cultivo, superficie, 
          rinde = rendimiento_qq_ha,
          antecesor_invernal_18_1, 
@@ -82,7 +87,6 @@ dat <- raw_dat %>%
 ```
 
 ```{r}
-str(dat)
 glimpse(dat)
 ```
 

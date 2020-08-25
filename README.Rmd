@@ -1,9 +1,6 @@
 ---
 output: github_document
 always_allow_html: true
-editor_options: 
-  chunk_output_type: console
-  
 ---
 
 ```{r, include = FALSE}
@@ -181,7 +178,7 @@ dat %>%
 dat %>%  
   mutate(id = paste0(campana, "-",variedad)) %>% 
   filter(id %in% var_secano, 
-         GM %in% c("IV","V"),
+         # GM %in% c("IV","V"),
          cultivo == 'soja_1') %>% 
   ggplot(aes(
     x=variedad,
@@ -243,8 +240,22 @@ bio_sum %>%
 - Efecto napa y agua a la siembra por año y por zona
 
 ```{r, eval=FALSE}
+dat$agua_inicio
+
 dat %>% 
-  
+  mutate(
+agua_inicio=stringi::stri_trans_general(agua_inicio,"Latin-ASCII"), # sacar acentos
+agua_inicio = recode(agua_inicio,  # cambios manuales
+                           '0'= 'VACIO')) %>% 
+  ggplot(aes(x=agua_inicio, y=rinde))+
+  geom_point(aes(col=napa), alpha =0.5, pch = 21)+
+  facet_grid(zona~ cultivo, scales="free")+
+  geom_smooth(aes(col=campana), se = F, 
+              span = 1 
+              )+
+  scale_x_date(date_breaks = "10 day", date_labels =  "%d-%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
 ```
 
 
