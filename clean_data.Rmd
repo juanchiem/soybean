@@ -17,11 +17,12 @@ pacman::p_load(tidyverse, googlesheets4)
 # raw_dat <- readxl::read_excel(here::here("data", "soja_cba.xlsx"),
 #                    .name_repair = janitor::make_clean_names)
 
-raw_dat <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit?usp=sharing")%>%   janitor::clean_names()
+raw_dat <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit?usp=sharing")%>%  janitor::clean_names()
 
 gs4_auth()
 soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
-raw_dat <- read_sheet(soja, sheet = "raw", range = "A1:AT2708")
+gs4_browse(soja)
+raw_dat <- read_sheet(soja, sheet = "raw", range = "A1:AW2708")
 raw_dat <- janitor::clean_names(raw_dat)
 ```
 
@@ -42,7 +43,10 @@ dat <- raw_dat %>%
          antecesor_invernal_18_1, 
          antecesor_estival_17_18, 
          fecha_siembra =fecha_de_siembra_dia_mes, 
-         variedad, biotecnologia,
+         variedad, 
+         tecno_herbicidas = biotecnologia_herbicidas,
+         tecno_rr = tecnologia_rr, 
+         tecno_sts = tecnologia_sts, 
          GM = grupo_de_madurez, semillero, 
          espaciamiento_cm, densidad, 
          riego, napa, agua_inicio=estado_del_perfil_a_la_siembra,  
@@ -50,7 +54,7 @@ dat <- raw_dat %>%
          dano_1 = percent_estimados_de_dano, adversidad_2, 
          dano_2 = percent_estimados_de_dano1) %>% 
   # filter(rinde > 10) %>%
-  mutate(zona = replace_na(zona, '3'), 
+  mutate(zona = as.factor(replace_na(zona, '3')), 
          fecha_siembra = lubridate::ymd(fecha_siembra), 
          GM = str_squish(str_to_upper(gsub(',', '\\.', GM))), 
          dano_1 = as.numeric(replace_na(dano_1, '0')), 
@@ -74,16 +78,13 @@ dat <- raw_dat %>%
     variedad = str_replace_all(variedad, pattern=" ", repl="")) %>% 
   
   mutate(
-    biotecnologia = str_to_upper(gsub(',', '\\.', biotecnologia)), 
-    biotecnologia = recode(biotecnologia,  # cambios manuales
-                           'STS + INTACTA'= 'INTACTA + STS',
-                           'RR1'= 'RR'), 
-    biotecnologia = str_replace_all(biotecnologia, c('INTACTA'), "IPRO"),
-) %>% 
-  mutate(riego = str_to_upper(gsub(',', '\\.', riego))) %>% 
+    tecno_herbicidas = str_to_upper(gsub(',', '\\.', tecno_herbicidas)), 
+    tecno_rr = str_to_upper(gsub(',', '\\.', tecno_rr)), 
+    tecno_sts = str_to_upper(gsub(',', '\\.', tecno_sts))) %>% 
+  mutate(riego = str_to_upper(gsub(',', '\\.', riego))) # %>% 
   
-  mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
-  mutate(id_row = 1:nrow(.))
+  # mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
+  # mutate(id_row = 1:nrow(.))
 ```
 
 ```{r}
