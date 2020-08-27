@@ -119,23 +119,27 @@ mutate_if(is.character, as.factor)
 ```{r}
 subset(dat_sum, 
        cultivo == "soja_1" ) %>% 
-        treemap(index=c("GM", "variedad"),
-                vSize="var_sup",
-                vColor="rinde_medio",
-                type = "value",
-                title = "Soja 1° - Superficie de variedades por grupo de madurez",
-                title.legend = "Rendimiento medio (qq/ha)")
+  treemap(index=c("GM", "variedad"),
+          vSize="var_sup",
+          vColor="rinde_medio",
+          type = "value",
+          title = "Soja 1° - Superficie de variedades por grupo de madurez",
+          title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          inflate.labels=F)
 ```
 
 ```{r}
 subset(dat_sum, 
        cultivo == "soja_1" & GM == "III") %>% 
-        treemap(index=c("campana", "variedad"),
-                vSize="var_sup",
-                vColor="rinde_medio",
-                type = "value",
-                title = "Soja 1° - GM III",
-                title.legend = "Rendimiento medio (qq/ha)")
+  treemap(index=c("campana", "variedad"),
+          vSize="var_sup",
+          vColor="rinde_medio",
+          type = "value",
+          title = "Soja 1° - GM III",
+          title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          inflate.labels=F)
 ```
 
 ```{r}
@@ -146,7 +150,9 @@ subset(dat_sum,
                 vColor="rinde_medio",
                 type = "value",
                 title = "Soja 1° - GM IV",
-                title.legend = "Rendimiento medio (qq/ha)")
+                title.legend = "Rendimiento medio (qq/ha)",
+                          overlap.labels=1, 
+          inflate.labels=F)
 
 ```
 
@@ -158,7 +164,9 @@ subset(dat_sum,
                 vColor="rinde_medio",
                 type = "value",
                 title = "Soja 1° - GM V",
-                title.legend = "Rendimiento medio (qq/ha)")
+                title.legend = "Rendimiento medio (qq/ha)",
+                          overlap.labels=1, 
+          inflate.labels=F)
 ```
 
 
@@ -170,7 +178,9 @@ subset(dat_sum,
                 vColor="rinde_medio",
                 type = "value",
                 title = "Soja 1° - GM VI",
-                title.legend = "Rendimiento medio (qq/ha)")
+                title.legend = "Rendimiento medio (qq/ha)",
+                          overlap.labels=1, 
+          inflate.labels=F)
 ```
 
 ### Soja 2°
