@@ -114,7 +114,6 @@ mutate_if(is.character, as.factor)
 # dat_sum
 ```
 
-* Soja de 1° (superior) y 2° (inferior)
 
 ```{r}
 subset(dat_sum, 
@@ -126,7 +125,11 @@ subset(dat_sum,
           title = "Soja 1° - Superficie de variedades por grupo de madurez",
           title.legend = "Rendimiento medio (qq/ha)",
           overlap.labels=1, 
-          inflate.labels=F)
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
 ```
 
 ```{r}
@@ -139,7 +142,11 @@ subset(dat_sum,
           title = "Soja 1° - GM III",
           title.legend = "Rendimiento medio (qq/ha)",
           overlap.labels=1, 
-          inflate.labels=F)
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
 ```
 
 ```{r}
@@ -151,8 +158,12 @@ subset(dat_sum,
                 type = "value",
                 title = "Soja 1° - GM IV",
                 title.legend = "Rendimiento medio (qq/ha)",
-                          overlap.labels=1, 
-          inflate.labels=F)
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
 
 ```
 
@@ -165,8 +176,12 @@ subset(dat_sum,
                 type = "value",
                 title = "Soja 1° - GM V",
                 title.legend = "Rendimiento medio (qq/ha)",
-                          overlap.labels=1, 
-          inflate.labels=F)
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
 ```
 
 
@@ -179,8 +194,12 @@ subset(dat_sum,
                 type = "value",
                 title = "Soja 1° - GM VI",
                 title.legend = "Rendimiento medio (qq/ha)",
-                          overlap.labels=1, 
-          inflate.labels=F)
+          overlap.labels=1, 
+          inflate.labels=F,
+                    bg.labels=c("transparent"),              # Background color of labels
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
 ```
 
 ### Soja 2°
@@ -192,7 +211,14 @@ subset(dat_sum, cultivo == "soja_2") %>%
                 vColor="rinde_medio",
                 type = "value",
                 title = "Soja 2° - Superficie de variedades por grupo de madurez",
-                title.legend = "Rendimiento medio (qq/ha)")
+                title.legend = "Rendimiento medio (qq/ha)",
+                          overlap.labels=1, 
+          inflate.labels=F,
+          bg.labels=c("transparent"),              # Background color of labels
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
+
 
 ```
 

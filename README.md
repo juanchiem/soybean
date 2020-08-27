@@ -64,8 +64,6 @@
 
 ## Distribución de variedades: superficie (tamaño de cuadrados) y rendimientos (intensidad de color) por GM
 
-  - Soja de 1° (superior) y 2° (inferior)
-
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
