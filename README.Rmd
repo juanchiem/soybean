@@ -108,31 +108,32 @@ dat_sum <- dat %>%
   group_by(cultivo, GM, variedad) %>%
   summarise(var_lotes= n(), 
             var_sup = sum(superficie, na.rm = TRUE),
-            rinde_medio = median(rinde, na.rm = TRUE), .groups = 'drop')
+            rinde_medio = median(rinde, na.rm = TRUE), .groups = 'drop') %>% 
+mutate_if(is.character, as.factor)
 # dat_sum
 ```
 
-```{r}
-treemap(dat_sum %>% filter(cultivo =="soja_1"),
-        index=c("GM", "variedad"),
-        vSize="var_sup",
-        vColor="rinde_medio",
-        type = "value",
-        title="Soja de 1° - Uso de variedades por grupo de madurez",
-        title.legend = "Rendimiento medio (qq/ha)")
-```
+* Soja de 1° (superior) y 2° (inferior)
 
 ```{r}
-treemap(dat_sum %>% filter(cultivo =="soja_2"),
-        index = c("GM", "variedad"),
-        vSize = "var_sup",
-        vColor = "rinde_medio",
-        type = "value",
-        title = "Soja de 2° - Uso de variedades por grupo de madurez",
-        title.legend = "Rendimiento medio (qq/ha)")
+subset(dat_sum, cultivo == "soja_1") %>% 
+        treemap(index=c("GM", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - Superficie de variedades por grupo de madurez",
+                title.legend = "Rendimiento medio (qq/ha)")
+
+subset(dat_sum, cultivo == "soja_2") %>% 
+        treemap(index=c("GM", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 2° - Superficie de variedades por grupo de madurez",
+                title.legend = "Rendimiento medio (qq/ha)")
 ```
 
-- Area de siembra de grupos de madurez por zona y tipo de cultivo de soja
+- Area de siembra de GM por zona y tipo de cultivo de soja
 
 ```{r}
 dat_sum2 <- dat %>% 
@@ -159,7 +160,6 @@ dat_sum2 %>%
   scale_fill_viridis_d(direction = -1)
 ```
 
-
 ## Ventanas de siembra por zona / GM
 
 ### Soja 1° 
@@ -172,11 +172,52 @@ dat %>%
          fecha_siembra < '2018-12-31', 
          cultivo == "soja_1") %>%
   ggplot(aes(x = fecha_siembra, y = zona)) +
-  geom_density_ridges(aes(height =..ndensity.., fill = GM), scale = .5, alpha =0.5) + 
+  geom_density_ridges(aes(height =..ndensity.., fill = campana), 
+                      scale = .5, alpha =0.5,  
+      position = position_points_jitter(height = 0.1))+
   scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
-  facet_wrap("campana")+
-  labs(x= "", y = "Zona")+
+  labs(x= "", y = "Zona", 
+       title = "Evolución de Ventanas de siembra global (todos los GM)" ,
+       fill = "")+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_1") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity.., fill = GM), 
+                      scale = .5, alpha =0.5,  
+      position = position_points_jitter(height = 0.1))+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  # facet_grid(campana~ GM)+
+  # facet_wrap("campana")+
+  labs(x= "", y = "Zona", fill = "GM", 
+       title = "Ventanas de siembra promedio 2017-2020" )+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_1") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity..), 
+                      scale = .5, alpha =0.5,  
+      position = position_points_jitter(height = 0.1))+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  facet_grid(campana~ GM)+
+  # facet_wrap("campana")+
+  labs(x= "", y = "Zona",
+              title = "Ventanas de siembra global por GM / campaña")+
   theme_bw()%+replace% 
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```

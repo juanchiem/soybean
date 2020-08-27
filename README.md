@@ -64,24 +64,27 @@
 
 ## Distribución de variedades: superficie (tamaño de cuadrados) y rendimientos (intensidad de color) por GM
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+  - Soja de 1° (superior) y 2° (inferior)
+
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+  - Area de siembra de GM por zona y tipo de cultivo de soja
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
-
-  - Area de siembra de grupos de madurez por zona y tipo de cultivo de
-    soja
-
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ## Ventanas de siembra por zona / GM
 
 ### Soja 1°
 
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
 ![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ### Soja 2°
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ## Rendimientos por fecha de siembra x zona
 
@@ -90,11 +93,11 @@
 
 Soja 1°
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 Soja 2°
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
   - Tomar las 5 variedades mas sembradas de cada GM y ver distribucion
     de rendimientos (por zona, para no meter ruido del potencial de las
@@ -144,20 +147,20 @@ y GM
 
 ### Soja de 1°
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 > el rinde mediano es mayor en los GM IV y III y tinen menor CV% que las
 > GM V y VI
 
 ### Soja de 2°
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
   - Evolución de uso de biotecnologia por campaña
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
-
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
     #> $colour
     #> [1] "ona"
