@@ -10,11 +10,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-Referencias para tener en cuenta: 
-
-[Revista Horizonte digital](https://issuu.com/horizonteadigital/docs/ha_130)
-
-
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
 # dat <- read_csv(here::here("data/clean_data.csv"))
@@ -27,20 +22,36 @@ load(here::here("soy_dat.Rdata"))
 glimpse(dat)
 ```
 
-```{r}
-dat %>% select(superficie, rinde) %>% 
-  rename(`Rinde (qq/ha)` = rinde, `Superficie (ha)` = superficie) %>% 
-  pivot_longer(everything()) %>% 
-  ggplot(aes(value))+
-  geom_histogram()+
-  facet_wrap("name", scales = "free")+
-  geom_rug()+
-  labs(x = "Valores observados", y="Cantidad de casos")+
-  theme_bw()
+# Lote medio de cada zona  (2017-2020)
 
+```{r fig.height=4, fig.width=6}
+dat %>% select(zona, superficie, rinde) %>% 
+  rename(`Rinde (qq/ha)` = rinde, `Superficie (ha)` = superficie) %>% 
+  pivot_longer(-zona) %>% 
+  group_by(zona, name) %>% summarise(value = round(median(value, na.rm = T),0)) -> datm
+
+dat %>% select(zona, superficie, rinde) %>% 
+  rename(`Rinde (qq/ha)` = rinde, `Superficie (ha)` = superficie) %>% 
+  pivot_longer(-zona) %>% 
+  mutate_if(is.character, as.factor)-> long 
+
+levels(long$zona) %>% 
+  map(~ subset(long, zona == .) %>% 
+        ggplot(aes(x = value))+
+        geom_histogram(fill = "steelblue")+
+        facet_wrap("name", scales = "free")+
+        geom_rug()+
+        labs(x = "Valores observados", y="Cantidad de casos", 
+             title = paste0("Lote típico de la zona ", .))+
+        theme_bw()+
+        cowplot:: background_grid(minor = c("none", "xy", "x", "y"),
+                                  color.major = "grey95")+
+        geom_vline(data = subset(datm, zona == .), aes(xintercept = value),col='red',size=1)+
+        geom_text(data = subset(datm, zona == .), aes(x = value, label = value, y = -Inf, vjust = -1), col  = "white", fontface = 2)
+  )
 ```
 
-- Nro de observaciones por campaña / ecoregión / regional
+- Superficie por zona / regional / campaña
 
 ```{r}
 dat %>% 
@@ -74,9 +85,10 @@ dat %>%
   theme_bw(base_size = 12)
 ```
 
-- Cantidad de datos/faltantes por variable
 
-```{r}
+
+```{r, eval=FALSE}
+#Cantidad de datos/celdas vacias por variable
 dat %>%
   summarise_all(funs(sum(!is.na(.)))) %>%
   pivot_longer(everything(), names_to = "variable", values_to = "datos") %>% 
@@ -92,15 +104,13 @@ dat %>%
 
 ```{r}
 library(treemap)
-
 dat_sum <- dat %>% 
   group_by(cultivo, GM, variedad) %>%
   summarise(var_lotes= n(), 
             var_sup = sum(superficie, na.rm = TRUE),
-            rinde_medio = median(rinde, na.rm = TRUE))
+            rinde_medio = median(rinde, na.rm = TRUE), .groups = 'drop')
 # dat_sum
 ```
-
 
 ```{r}
 treemap(dat_sum %>% filter(cultivo =="soja_1"),
@@ -109,8 +119,7 @@ treemap(dat_sum %>% filter(cultivo =="soja_1"),
         vColor="rinde_medio",
         type = "value",
         title="Soja de 1° - Uso de variedades por grupo de madurez",
-        title.legend = "Rendimiento medio (qq/ha)"
-)
+        title.legend = "Rendimiento medio (qq/ha)")
 ```
 
 ```{r}
@@ -120,103 +129,230 @@ treemap(dat_sum %>% filter(cultivo =="soja_2"),
         vColor = "rinde_medio",
         type = "value",
         title = "Soja de 2° - Uso de variedades por grupo de madurez",
-        title.legend = "Rendimiento medio (qq/ha)"
-)
+        title.legend = "Rendimiento medio (qq/ha)")
 ```
 
-## Fecha de siembra x GM
+- Area de siembra de grupos de madurez por zona y tipo de cultivo de soja
 
-- Evolución de fecha de siembra por zona
+```{r}
+dat_sum2 <- dat %>% 
+  group_by(zona, cultivo, GM) %>%
+  summarise(#var_lotes= n(), 
+    var_sup = sum(superficie, na.rm = TRUE),
+    rinde_medio = median(rinde, na.rm = TRUE), 
+    .groups = 'drop') %>% 
+  mutate_if(is.character, as.factor) %>% 
+  drop_na() %>% 
+  group_by(zona, cultivo) %>% 
+  mutate(porcent=var_sup/sum(var_sup)*100, 
+         cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) 
+
+dat_sum2 %>% 
+  ggplot(aes(x =factor(1), y = porcent, fill = GM)) +
+  geom_bar(stat='identity') + 
+  coord_polar(theta = "y")+
+  facet_grid(cultivo ~ zona, switch = "y")+
+  theme_void()+
+  geom_text(aes(label=round(porcent,0)),
+              position=position_stack(vjust=0.5),color="white",size=3)+
+  theme(legend.position="bottom")+
+  scale_fill_viridis_d(direction = -1)
+```
+
+
+## Ventanas de siembra por zona / GM
+
+### Soja 1° 
 
 ```{r}
 pacman::p_load(scales, ggridges)
 
 dat %>% 
   filter(fecha_siembra > '2018-09-15', 
-         fecha_siembra < '2018-12-31') %>%
-  ggplot(aes(x = fecha_siembra, y = factor(zona))) +
-  stat_density_ridges(aes(fill = GM), 
-                      scale = .95, alpha =0.7, 
-                      # quantile_lines = TRUE, quantiles = 2
-  )+
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_1") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity.., fill = GM), scale = .5, alpha =0.5) + 
   scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
   facet_wrap("campana")+
-  labs(x= "Fecha de siembra", y = "Zona agroecológica")
+  labs(x= "", y = "Zona")+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
-## Fecha de siembra x rinde
+### Soja 2° 
 
-- Rendimientos por fecha de siembra x zona
+```{r}
+dat %>% 
+  filter(fecha_siembra > '2018-11-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_2") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity.., fill = GM), scale = .5, alpha =0.5) + 
+  scale_x_date(date_labels = "%d-%b", breaks = date_breaks("15 days"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  facet_wrap("campana")+
+  labs(x= "", y = "Zona")+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+## Rendimientos por fecha de siembra x zona
+
+(El suavizado de la tendencia esta hecho con modelo polinomial de grado 2, o sea que puede ser lineal o cuadratico el ajuste)
+
+Soja 1°
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-dat %>% 
+dat %>% drop_na(rinde) %>% 
   filter(fecha_siembra > '2018-09-15', 
-         fecha_siembra < '2018-12-31') %>%
-  filter(!is.na(rinde)) %>%
-  filter(rinde>2) %>%
-  filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
-  filter(!(cultivo == "soja_2" & fecha_siembra < '2018-12-01')) %>% 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_1") %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
-  geom_point(aes(col=campana), alpha =0.5, pch = 21)+
-  facet_grid(zona~ cultivo, scales="free")+
-  geom_smooth(aes(col=campana), se = F, 
-              span = 1 
-              )+
-  scale_x_date(date_breaks = "10 day", date_labels =  "%d-%b")+
+  geom_point(aes(col=campana), alpha =0.5, size=0.8)+
+  facet_grid(zona~., scales="free_x")+
+  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  scale_x_date(date_breaks = "15 day", date_labels =  "%d-%b")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
 ```
 
-> Obs: elimine siembras de soja 2° anteriores al 1/12. Algo similar habria que hacer respecto a las soja 1°: eliminar siembras posteriores a 15/12? 
+Soja 2°
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31',
+         !is.na(rinde), 
+         rinde>4) %>%
+  filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
+  filter(!(cultivo == "soja_2" & fecha_siembra < '2018-12-01'), 
+         cultivo == "soja_2") %>% 
+  ggplot(aes(x=fecha_siembra, y=rinde))+
+  geom_point(aes(col=campana), alpha =0.5, size=0.8)+
+  facet_grid(zona~., scales="free_x")+
+  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  scale_x_date(date_breaks = "15 day", date_labels =  "%d-%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
+```
+
 
 - Tomar las 5 variedades mas sembradas de cada GM y ver distribucion de rendimientos (por zona, para no meter ruido del potencial de las mismas??
 
 ## Variedades
 
-```{r, eval=FALSE}
-dat %>% 
-  group_by(GM, variedad) %>%
-  tally() %>% 
-  arrange(GM, desc(n)) #%>% 
-  # knitr::kable()
-```
-
 ```{r}
-dat %>%  
-  filter(variedad %in% var_name, 
-         dano_tot == 0, 
+dat_top5 <- dat %>% 
+  filter(dano_tot == 0, 
          rinde > 5, 
          riego == "NO") %>% 
-  count(campana, variedad) %>% 
-  arrange(n) %>% 
-  filter(n>4) %>%   
-  mutate(id = paste0(campana, "-",variedad)) %>% 
-  pull(id) %>% unique() -> var_secano
+  group_by(#zona, 
+    cultivo, GM, variedad) %>%
+  summarise(var_sup = sum(superficie, na.rm = TRUE),
+            n_lotes = n(), 
+            rinde_mediano = median(rinde, na.rm = TRUE),
+            rinde_20 = quantile(rinde, 0.2, na.rm = TRUE),
+            rinde_80 = quantile(rinde, 0.8, na.rm = TRUE),
+            cv = raster::cv(rinde),
+            .groups = 'drop') %>%   
+  group_by(#zona, 
+    cultivo, GM) %>% 
+  top_n(n = 5, wt = var_sup) %>% 
+  arrange(#zona, 
+    cultivo, GM) %>% 
+  na.omit() %>% 
+  mutate_if(is.numeric, list(~round(.,1)))
+
+
+# dat_top5 <- semi_join(x=dat, y=dat_sum3, by=c("zona",  "cultivo", "GM","variedad")) %>%
+#   mutate_if(is.character, as.factor) 
+# dat_top5 %>% 
+#   group_by(zona, cultivo, GM, variedad) %>%
+#   summarise(var_sup = sum(superficie, na.rm = TRUE),
+#             .groups = 'drop') 
+  
 ```
 
+Rinde mediano (valor central), 20° y 80° percentil, por tipo de cultivo y GM
+
+```{r}
+dat_top5 %>% data.frame %>% knitr::kable()
+```
+
+
+### Soja de 1°
+
+```{r}
+mean_rinde <- dat_top5 %>% 
+  group_by(cultivo, GM) %>% 
+  summarise(rinde_mediano = mean(rinde_mediano))
+
+mean_cv <- dat_top5 %>% 
+  group_by(cultivo, GM) %>% 
+  summarise(cv = mean(cv))
+
+dat_top5 %>% 
+  filter(cultivo == "soja_1") %>% 
+  droplevels() %>%  
+  ggplot(aes(x = cv, y = rinde_mediano))+
+  geom_point()+
+  ggrepel::geom_text_repel(aes( label = variedad))+
+  # geom_label(aes(label = variedad, col = var_sup/1000))+
+  # scale_colour_viridis_c(  direction = -1)+
+  facet_wrap("GM", scales="fixed")+
+  theme_bw()+
+  labs(x = "Coeficiente de variación (%)", 
+       y  = "Rendimiento mediano (qq/ha)", 
+       title = "Soja 1° - Rendimiento de las 5 variedades mas sembradas por GM (2017 a 2020)")+
+  geom_hline(aes(yintercept = rinde_mediano), mean_rinde %>% filter(cultivo =="soja_1"), linetype = 2)+
+  geom_vline(aes(xintercept = cv), mean_cv %>% filter(cultivo =="soja_1"), linetype = 2)+
+  cowplot:: background_grid(minor = c("none", "xy", "x", "y"), 
+                            color.major = "grey95")
+```
+
+> el rinde mediano es mayor en los GM IV y III y tinen menor CV% que las
+GM V y VI
+
+### Soja de 2°
+
+```{r}
+dat_top5 %>% 
+  filter(cultivo == "soja_2") %>% 
+  droplevels() %>%  
+  ggplot(aes(x = cv, y = rinde_mediano))+
+  geom_point()+
+  ggrepel::geom_text_repel(aes( label = variedad))+
+  # geom_label(aes(label = variedad, col = var_sup/1000))+
+  # scale_colour_viridis_c(  direction = -1)+
+  facet_wrap("GM", scales="free")+
+  theme_bw()+
+  labs(x = "Coeficiente de variación (%)", 
+       y  = "Rendimiento mediano (qq/ha)", 
+       title = "Soja 2° - Rendimiento de las 5 variedades mas sembradas por GM (2017 a 2020)")+
+  geom_hline(aes(yintercept = rinde_mediano), mean_rinde %>% filter(cultivo =="soja_2"), linetype = 2)+
+  geom_vline(aes(xintercept = cv), mean_cv %>% filter(cultivo =="soja_2"), linetype = 2)+
+  cowplot:: background_grid(minor = c("none", "xy", "x", "y"), 
+                            color.major = "grey95")
+```
+
+```{r eval = F}
 ### Soja 1° 
 
-```{r fig.height=10}
-#http://stulp.gmw.rug.nl/ggplotworkshop/comparinggroupstatistics.html 
-dat %>%  
-  mutate(id = paste0(campana, "-",variedad)) %>% 
-  filter(id %in% var_secano, 
-         # GM %in% c("IV","V"),
-         cultivo == 'soja_1') %>% 
+dat_top5 %>%   
+  filter(cultivo == "soja_1",
+         zona ==1) %>% droplevels() %>%  
   ggplot(aes(
-    x=variedad,
-    # x=reorder(factor(variedad), rinde, FUN=median),
-             y=rinde))+
-  facet_grid(GM ~ campana,  scales="free", switch="y")  +
+    x=reorder(factor(variedad), rinde_mediano),
+    y=rinde_mediano))+
+  facet_grid(GM ~.,  scales="free")  +
   coord_flip()+
-  stat_summary(fun="mean", geom="point", size=2)+
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
-```
+  geom_pointrange(aes(ymin = rinde_20, ymax = rinde_80))
+# stat_summary(fun="mean", geom="point", size=2)+
+  # stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
 
-### Soja 2°
-
-```{r fig.height=10}
 dat %>%  
   mutate(id = paste0(campana, "-",variedad)) %>% 
   filter(id %in% var_secano, 
