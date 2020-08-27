@@ -104,8 +104,9 @@ dat %>%
 
 ```{r}
 library(treemap)
+
 dat_sum <- dat %>% 
-  group_by(cultivo, GM, variedad) %>%
+  group_by(campana, cultivo, GM, variedad) %>%
   summarise(var_lotes= n(), 
             var_sup = sum(superficie, na.rm = TRUE),
             rinde_medio = median(rinde, na.rm = TRUE), .groups = 'drop') %>% 
@@ -116,14 +117,65 @@ mutate_if(is.character, as.factor)
 * Soja de 1° (superior) y 2° (inferior)
 
 ```{r}
-subset(dat_sum, cultivo == "soja_1") %>% 
+subset(dat_sum, 
+       cultivo == "soja_1" ) %>% 
         treemap(index=c("GM", "variedad"),
                 vSize="var_sup",
                 vColor="rinde_medio",
                 type = "value",
                 title = "Soja 1° - Superficie de variedades por grupo de madurez",
                 title.legend = "Rendimiento medio (qq/ha)")
+```
 
+```{r}
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "III") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM III",
+                title.legend = "Rendimiento medio (qq/ha)")
+```
+
+```{r}
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "IV") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM IV",
+                title.legend = "Rendimiento medio (qq/ha)")
+
+```
+
+```{r}
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "V") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM V",
+                title.legend = "Rendimiento medio (qq/ha)")
+```
+
+
+```{r}
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "VI") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM VI",
+                title.legend = "Rendimiento medio (qq/ha)")
+```
+
+### Soja 2°
+
+```{r}
 subset(dat_sum, cultivo == "soja_2") %>% 
         treemap(index=c("GM", "variedad"),
                 vSize="var_sup",
@@ -131,6 +183,7 @@ subset(dat_sum, cultivo == "soja_2") %>%
                 type = "value",
                 title = "Soja 2° - Superficie de variedades por grupo de madurez",
                 title.legend = "Rendimiento medio (qq/ha)")
+
 ```
 
 - Area de siembra de GM por zona y tipo de cultivo de soja
@@ -147,15 +200,16 @@ dat_sum2 <- dat %>%
   group_by(zona, cultivo) %>% 
   mutate(porcent=var_sup/sum(var_sup)*100, 
          cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) 
+  
 
-dat_sum2 %>% 
+dat_sum2 %>% #data.frame
   ggplot(aes(x =factor(1), y = porcent, fill = GM)) +
-  geom_bar(stat='identity') + 
+  geom_bar(stat='identity') +
   coord_polar(theta = "y")+
   facet_grid(cultivo ~ zona, switch = "y")+
   theme_void()+
-  geom_text(aes(label=round(porcent,0)),
-              position=position_stack(vjust=0.5),color="white",size=3)+
+  geom_text(aes( label=paste0(round(porcent), "\n",GM)), 
+            position=position_stack(vjust=0.5), color="white",size=3, fontface ="bold")+
   theme(legend.position="bottom")+
   scale_fill_viridis_d(direction = -1)
 ```
@@ -246,11 +300,13 @@ dat %>%
 Soja 1°
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
 dat %>% drop_na(rinde) %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-29',
          rinde>4,
-         cultivo == "soja_1") %>% 
+         cultivo == "soja_1") %>%
+  mutate(zona = fct_rev(zona)) %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
   facet_grid(zona~., scales="free_x")+
@@ -271,6 +327,7 @@ dat %>%
   filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
   filter(!(cultivo == "soja_2" & fecha_siembra < '2018-12-01'), 
          cultivo == "soja_2") %>% 
+  mutate(zona = fct_rev(zona)) %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
   facet_grid(zona~., scales="free_x")+
