@@ -1,0 +1,75 @@
+---
+title: "Performance de variedades"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+Cuanto fue el potencial del rendimiento en cada ambiente (zona/año)
+
+```{r}
+potencial_ambiente <- 
+  dat %>% 
+  filter(dano_tot == 0, 
+         rinde > 4, 
+         riego == "NO") %>% 
+  group_by(campana, zona, cultivo) %>%
+  summarise(rinde_50 = median(rinde, na.rm = TRUE),
+            rinde_95 = quantile(rinde, 0.95, na.rm = TRUE),
+            .groups = 'drop') 
+
+```
+
+```{r}
+potencial_ambiente %>%
+  mutate(cultivo = recode(cultivo, 
+                          'soja_1'= 'Soja 1°',
+                          'soja_2'= 'Soja 2°')) %>% 
+  ggplot(aes(zona, rinde_95, fill = cultivo)) + 
+  geom_bar(
+    position = "identity",
+    stat = "identity",
+    alpha = .5)+
+  facet_grid(. ~ campana)+
+  # theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  theme_bw()+
+  labs(x = "Zona agroecológica", y = "Potencial de rendimiento (95°)",
+       fill = "")
+```
+
+```{r}
+dat <- left_join(x=dat, y=potencial_ambiente, 
+                     by=c("zona",  "cultivo", "variedad")) %>%
+  mutate_if(is.character, as.factor) 
+```
+
+
+```{r}
+potencial_ambiente <- 
+dat %>% 
+  filter(dano_tot == 0, 
+         rinde > 4, 
+         riego == "NO") %>% 
+  group_by(campana, zona, cultivo, variedad) %>%
+  summarise(var_sup = sum(superficie, na.rm = TRUE),
+            n_lotes = n(), 
+            rinde_mediano = median(rinde, na.rm = TRUE),
+            # rinde_20 = quantile(rinde, 0.2, na.rm = TRUE),
+            # rinde_80 = quantile(rinde, 0.8, na.rm = TRUE),
+            # cv = raster::cv(rinde),
+            .groups = 'drop') %>%   
+  filter(cultivo == "soja_1", zona ==".") %>%
+  group_by(variedad) %>% 
+  mutate(flag=n_distinct(campana)) %>%
+  filter(flag==3) %>% 
+  group_by(variedad) %>%
+  mutate(sup=sum(var_sup)) %>%
+  filter(sup>500) %>% #View
+  mutate_if(is.character, as.factor) %>% 
+  droplevels() %>% 
+  ggplot(aes(x = campana, y = rinde_mediano, ))+
+  geom_point(aes(col = variedad)) +
+  geom_line(aes(group = variedad, col = variedad)) 
+
+```
+

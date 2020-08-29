@@ -1,0 +1,183 @@
+---
+title: "Manejo"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+pacman::p_load(tidyverse) 
+# dat <- read_csv(here::here("data/clean_data.csv"))
+load(here::here("soy_dat.Rdata"))
+```
+
+## Ventanas de siembra por zona / GM
+
+### Soja 1° 
+
+```{r}
+pacman::p_load(scales, ggridges)
+
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_1") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity.., fill = campana), 
+                      scale = .5, alpha =0.5,  
+      position = position_points_jitter(height = 0.1))+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  labs(x= "", y = "Zona", 
+       title = "Evolución de Ventanas de siembra global (todos los GM)" ,
+       fill = "")+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave(last_plot(), file = "plots/ventanas_siembra_campana.png", width = 5.5, height = 4)
+
+```
+
+
+```{r}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_1") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity.., fill = GM), 
+                      scale = .5, alpha =0.5,  
+      position = position_points_jitter(height = 0.1))+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  # facet_grid(campana~ GM)+
+  # facet_wrap("campana")+
+  labs(x= "", y = "Zona", fill = "GM", 
+       title = "Ventanas de siembra soja 1° - promedio 2017-2020" )+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM.png", width = 5.5, height = 4)
+
+```
+
+```{r}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_1") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity..), 
+                      scale = .5, alpha =0.5,  
+      position = position_points_jitter(height = 0.1))+
+  scale_x_date(date_labels = "%b", breaks = date_breaks("1 months"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  facet_grid(campana~ GM)+
+  # facet_wrap("campana")+
+  labs(x= "", y = "Zona",
+              title = "Ventanas de siembra global por GM / campaña")+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM_campana.png", width = 5.5, height = 4)
+
+```
+
+
+### Soja 2° 
+
+```{r}
+dat %>% 
+  filter(fecha_siembra > '2018-11-15', 
+         fecha_siembra < '2018-12-31', 
+         cultivo == "soja_2") %>%
+  ggplot(aes(x = fecha_siembra, y = zona)) +
+  geom_density_ridges(aes(height =..ndensity.., fill = GM), scale = .5, alpha =0.5) + 
+  scale_x_date(date_labels = "%d-%b", breaks = date_breaks("15 days"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+ 
+  facet_wrap("campana")+
+  labs(x= "", y = "Zona")+
+  theme_bw()%+replace% 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave(last_plot(), file = "plots/ventanas_siembra_sj2.png", width = 5.5, height = 4)
+
+```
+
+
+## Rendimientos por fecha de siembra x zona
+
+(El suavizado de la tendencia esta hecho con modelo polinomial de grado 2, o sea que puede ser lineal o cuadratico el ajuste)
+
+Soja 1°
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+dat %>% drop_na(rinde) %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_1") %>%
+  mutate(zona = fct_rev(zona)) %>% 
+  ggplot(aes(x=fecha_siembra, y=rinde))+
+  geom_point(aes(col=campana), alpha =0.5, size=0.8)+
+  facet_grid(zona~., scales="free_x")+
+  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  scale_x_date(date_breaks = "15 day", date_labels =  "%d-%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")
+
+ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", width = 5.5, height = 4)
+
+```
+
+Soja 2°
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+dat %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-31',
+         !is.na(rinde), 
+         rinde>4) %>%
+  filter(!(cultivo == 'soja_2' & zona ==1 & campana =="2018/19")) %>%
+  filter(!(cultivo == "soja_2" & fecha_siembra < '2018-12-01'), 
+         cultivo == "soja_2") %>% 
+  mutate(zona = fct_rev(zona)) %>% 
+  ggplot(aes(x=fecha_siembra, y=rinde))+
+  geom_point(aes(col=campana), alpha =0.5, size=0.8)+
+  facet_grid(zona~., scales="free_x")+
+  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  scale_x_date(date_breaks = "15 day", date_labels =  "%d-%b")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
+
+ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", width = 5.5, height = 4)
+```
+
+
+
+```{r}
+pacman::p_load(tidyverse, googlesheets4)
+gs4_auth()
+soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
+gs4_browse(soja)
+cs_bar <- read_sheet(soja, sheet = "CS_vs_barbecho") %>%  
+  janitor::clean_names() %>% 
+  mutate_if(is.character, as.factor) 
+```
+
+```{r}
+glimpse(cs_bar)
+```
+
+```{r}
+cs_bar %>% 
+  mutate(napa = str_squish(str_to_upper(gsub(',', '\\.', napa)))) %>% 
+  drop_na(napa) %>% 
+  ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha)) +   geom_point()+
+  geom_smooth(method="lm", se = F)+
+  geom_abline(intercept = 0, slope = 1, linetype = 2)+
+  labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)")+
+  facet_grid(campana ~ .)
+
+```
+
