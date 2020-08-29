@@ -23,7 +23,6 @@ potencial_ambiente <-
   summarise(rinde_50 = median(rinde, na.rm = TRUE),
             rinde_95 = quantile(rinde, 0.95, na.rm = TRUE),
             .groups = 'drop') 
-
 ```
 
 ```{r}
@@ -47,49 +46,95 @@ ggsave(last_plot(), file = "plots/potencial_ambiente.png", width = 5, height = 3
 ```
 
 ```{r}
-dat <- left_join(x=dat, y=potencial_ambiente, 
-                     by=c("zona",  "cultivo", "variedad")) %>%
-  mutate_if(is.character, as.factor) 
+dat1 <- left_join(x=dat, y=potencial_ambiente, 
+                     by=c("campana", "zona",  "cultivo")) %>%
+  mutate_if(is.character, as.factor) %>% 
+  mutate(razon_rinde = rinde/rinde_50) 
+
+dat1 %>% 
+  filter(campana == "2017/18", 
+         cultivo == "soja_1") %>% 
+  ggplot(aes(variedad, razon_rinde))+
+  geom_boxplot()+
+  facet_wrap("zona", scales = "free")
 ```
 
 
 ```{r}
 potencial_ambiente <- 
+
 dat %>% 
   filter(dano_tot == 0, 
          rinde > 4, 
-         riego == "NO") %>% 
-  group_by(campana, zona, cultivo, variedad) %>%
+         riego == "NO", 
+         cultivo == "soja_1") %>%
+  group_by(campana, zona, variedad) %>%
   summarise(var_sup = sum(superficie, na.rm = TRUE),
-            n_lotes = n(), 
-            rinde_mediano = median(rinde, na.rm = TRUE),
-            # rinde_20 = quantile(rinde, 0.2, na.rm = TRUE),
-            # rinde_80 = quantile(rinde, 0.8, na.rm = TRUE),
-            # cv = raster::cv(rinde),
+            rinde50 = median(rinde, na.rm = TRUE),
             .groups = 'drop') %>%   
-  filter(cultivo == "soja_1", zona ==".") %>%
   group_by(variedad) %>% 
   mutate(flag=n_distinct(campana)) %>%
   filter(flag==3) %>% 
-  group_by(variedad) %>%
-  mutate(sup=sum(var_sup)) %>%
-  filter(sup>500) %>% #View
+  group_by(zona, variedad) %>%
+  mutate(sup=sum(var_sup)) %>% 
+  filter(sup>500) %>% 
   mutate_if(is.character, as.factor) %>% 
-  droplevels() %>% 
-  ggplot(aes(x = campana, y = rinde_mediano, ))+
-  geom_point(aes(col = variedad)) +
-  geom_line(aes(group = variedad, col = variedad)) 
+  droplevels() -> dat_top # soja de 1°, sembrada en los 3 años en mas de 500 ha
+  
+# dat_top %>% 
+#   ggplot(aes(x = campana, y = rinde_mediano))+
+#   geom_point(aes(col = variedad)) +
+#   geom_line(aes(group = variedad, col = variedad))
 
+dat_top %>% distinct(variedad) %>% pull() -> var_names
 ```
-
 
 Como primer abordaje analizaremos por zona, solo aquellos cultivares:  
 - sembrados las 3 campañas 
 - En al menos 500 has 
 - descartando lotes con algun nivel de estres declarado 
-- lotes de al menos 5 qq/ha
 
 ```{r}
+dat1 %>% 
+  filter(variedad %in% var_names, zona == 1) %>% 
+  mutate(variedad = fct_reorder(variedad, razon_rinde, .fun='median')) %>%
+  ggplot(aes(variedad, razon_rinde))+
+  geom_boxplot()+
+  coord_flip()+
+  stat_summary(fun = "median", geom = "point")
+
+dat1 %>% 
+  filter(variedad %in% var_names, zona == 2) %>% 
+  mutate(variedad = fct_reorder(variedad, razon_rinde, .fun='median')) %>%
+  ggplot(aes(variedad, razon_rinde))+
+  geom_boxplot()+
+  coord_flip()+
+  stat_summary(fun = "median", geom = "point")
+
+dat1 %>% 
+  filter(variedad %in% var_names, zona == 3) %>% 
+  mutate(variedad = fct_reorder(variedad, razon_rinde, .fun='median')) %>%
+  ggplot(aes(variedad, razon_rinde))+
+  geom_boxplot()+
+  coord_flip()+
+  stat_summary(fun = "median", geom = "point")
+
+dat1 %>% 
+  filter(variedad %in% var_names, zona == 4) %>% 
+  mutate(variedad = fct_reorder(variedad, razon_rinde, .fun='median')) %>%
+  ggplot(aes(variedad, razon_rinde))+
+  geom_boxplot()+
+  coord_flip()+
+  stat_summary(fun = "median", geom = "point")
+
+dat1 %>% 
+  filter(variedad %in% var_names, zona == 5) %>% 
+  mutate(variedad = fct_reorder(variedad, razon_rinde, .fun='median')) %>%
+  ggplot(aes(variedad, razon_rinde))+
+  geom_boxplot()+
+  coord_flip()+
+  stat_summary(fun = "median", geom = "point")
+
 # group_by(zona, cultivo) %>% 
   # top_n(n = 10, wt = var_sup) %>% 
   # arrange(zona, cultivo) %>% 
@@ -101,11 +146,19 @@ Como primer abordaje analizaremos por zona, solo aquellos cultivares:
 Rinde mediano (valor central), 20° y 80° percentil, por tipo de cultivo y GM
 
 ```{r}
-# dat_top5 %>% data.frame %>% knitr::kable()
+dat_top %>% 
+  group_by(zona, variedad) %>% 
+  summarise(rinde_mediano = median(rinde50), 
+            superficie = sum(sup))%>%
+  group_by(zona) %>% 
+  slice_max(order_by = superficie, n = 5) %>% 
+  data.frame -> variedades_mas_sembradas
+
+sheet_write(variedades_mas_sembradas, ss = soja, sheet = "variedades")
 ```
 
 ```{r}
-dat_top <- semi_join(x=dat, y=dat_top0, by=c("zona",  "cultivo","variedad")) %>%
+dat_top <- semi_join(x=dat, y=dat_top, by=c("zona",  "cultivo","variedad")) %>%
   mutate_if(is.character, as.factor) 
   
 # levels(dat_top$zona) %>%  
@@ -215,74 +268,6 @@ dat %>%
   stat_summary(fun="mean", geom="point", size=2)+
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", color="blue", width=0.2)
 ```
-
-- Evolución de uso de biotecnologia por campaña
-
-```{r}
-rr_sum <- dat %>% 
-  group_by(zona, campana, tecno_rr) %>%
-  summarise(lotes = n()) %>%
-  # group_by(zona, campana, tecno_rr) %>%
-  # summarise(lotes = n()) %>%
-  group_by(zona, campana) %>%
-  mutate(perc = lotes/sum(lotes)) %>%
-  separate(campana, c("year",NA), "/") %>% 
-  ungroup()
-
-rr_sum %>% 
-  drop_na(tecno_rr) %>% 
-  ggplot(aes(x = factor(year), 
-             y = perc*100, 
-             col = factor(tecno_rr), 
-             group =factor(tecno_rr)))+
-  geom_line()+
-  facet_grid(.~zona,  scales="free")  +
-  labs(x = NULL, col=NULL, y = "% del área de cada zona", 
-       title = "Evolucion de superficie de adopción de biotecnología RR por zona")+
-  ggrepel::geom_text_repel(
-    data = rr_sum %>% filter(year == 2019),
-    aes(label = tecno_rr),
-    size =3, 
-    nudge_x = 0.1) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  guides(col = "none")
-
-# gs4_auth()
-# sheet_write(bio_sum, ss = soja, sheet = "var_x_bio")
-```
-
-```{r}
-sts_sum <- dat %>% 
-  drop_na(tecno_sts) %>%
-  group_by(zona, campana, tecno_sts) %>% 
-  summarise(lotes = n()) %>% 
-  # group_by(zona, campana) %>%
-  # mutate(perc = lotes/sum(lotes)) %>%
-  separate(campana, c("year",NA), "/") %>%
-  ungroup()
-
-sts_sum %>% 
-  filter(tecno_sts == "STS") %>% 
-  drop_na(tecno_sts) %>% 
-  ggplot(aes(x = factor(year), 
-             y = lotes, 
-             col = factor(zona), 
-             group =factor(zona)))+
-  geom_line()+
-  # facet_grid(.~zona,  scales="free")  +
-  labs(x = NULL, col=NULL, y = "Lotes por zona", 
-       title = "Evolucion de superficie de adopción de biotecnología sts")+
-  # ggrepel::geom_text_repel(
-  #   data = sts_sum %>% filter(year == 2019),
-  #   aes(label = zona),
-  #   size =3, 
-  #   nudge_x = 0.1) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) #+
-  guides(col = "ona")
-```
-
-> esta raro esto
-
 
 
 - Efecto napa y agua a la siembra por año y por zona

@@ -58,6 +58,8 @@ ventanas\_siembra\_sj1\_GM.png ![](plots/ventanas_siembra_sj1_GM.png)
 ventanas\_siembra\_sj1\_GM\_campana.png
 ![](plots/ventanas_siembra_sj1_GM_campana.png)
 
+fosforo\_respuesta18.png ![](plots/fosforo_respuesta18.png)
+
 ### Soja 2°
 
 ventanas\_siembra\_sj2.png ![](plots/ventanas_siembra_sj2.png)
@@ -85,8 +87,23 @@ efecto\_antecesor\_napa.png ![](plots/efecto_antecesor_napa.png)
 
 efecto\_antecesor.png ![](plots/efecto_antecesor.png)
 
+## Fósforo
+
+fosforo\_respuesta.png ![](plots/fosforo_respuesta.png)
+
+fosforo\_dosis.png ![](plots/fosforo_dosis.png)
+
+balance\_fosforo.png ![](plots/balance_fosforo.png)
+
+fosforo\_respuesta12.png ![](plots/fosforo_respuesta12.png)
+
+fosforo\_respuesta18.png ![](plots/fosforo_respuesta18.png)
+
 # Variedades
 
 ## Potencial ambiente
 
 potencial\_ambiente.png ![](plots/potencial_ambiente.png)
+
+[Soja 1° - rinde de variedades mas sembradas por
+zona](https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit#gid=285024912)

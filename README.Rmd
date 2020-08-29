@@ -3,6 +3,7 @@ output: github_document
 always_allow_html: true
 ---
 
+
 ```{r include = FALSE}
 knitr::opts_chunk$set(
   collapse = F, echo = T, message=FALSE, warning=FALSE,
@@ -89,6 +90,10 @@ ventanas_siembra_sj1_GM.png
 ventanas_siembra_sj1_GM_campana.png
 ![](plots/ventanas_siembra_sj1_GM_campana.png)
 
+fosforo_respuesta18.png
+![](plots/fosforo_respuesta18.png)
+
+
 
 ### Soja 2° 
 
@@ -121,9 +126,28 @@ efecto_antecesor_napa.png
 efecto_antecesor.png
 ![](plots/efecto_antecesor.png)
 
+## Fósforo 
+fosforo_respuesta.png
+![](plots/fosforo_respuesta.png)
+
+fosforo_dosis.png
+![](plots/fosforo_dosis.png)
+
+balance_fosforo.png
+![](plots/balance_fosforo.png)
+
+fosforo_respuesta12.png
+![](plots/fosforo_respuesta12.png)
+
+fosforo_respuesta18.png
+![](plots/fosforo_respuesta18.png)
+
+
 # Variedades
 
 ## Potencial ambiente
 
 potencial_ambiente.png
 ![](plots/potencial_ambiente.png)
+
+[Soja 1° - rinde de variedades mas sembradas por zona](https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit#gid=285024912)
