@@ -3,108 +3,97 @@ output: github_document
 always_allow_html: true
 ---
 
----
-
-```{r, include = FALSE}
+```{r include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE, echo = T, message=FALSE, warning=FALSE, 
-  comment = "#>"
-)
+  collapse = F, echo = T, message=FALSE, warning=FALSE,
+  comment = "#>",
+  out.width = "50%",
+  dpi = 50)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-pacman::p_load(tidyverse) 
+# pacman::p_load(tidyverse) 
 # dat <- read_csv(here::here("data/clean_data.csv"))
-load(here::here("soy_dat.Rdata"))
-
+# load(here::here("soy_dat.Rdata"))
 ```
 
-## Dataset 
+- [carpeta de imágenes](https://github.com/juanchiem/soybean/tree/master/plots)
 
-```{r}
-glimpse(dat)
-```
-
-(carpeta de imagenes)[https://github.com/juanchiem/soybean/tree/master/plots] 
+- [carpeta de datos](https://github.com/juanchiem/soybean/tree/master/data) 
 
 # Superficies
 
 ## Lote medio de cada zona  (2017-2020)
 
-```{r}
-knitr::include_graphics(here::here("plots","lote_tipico_zona1.png"))
-```
-
-```{r fig.height=3, fig.width=3}
-
-knitr::include_graphics(here::here("plots", "lote_tipico_zona2.png"))
-
-knitr::include_graphics(here::here("plots", "lote_tipico_zona3.png"))
-
-knitr::include_graphics(here::here("plots", "lote_tipico_zona4.png"))
-
-knitr::include_graphics(here::here("plots", "lote_tipico_zona5.png"))
-```
+lote_tipico_zona1.png
+![](plots/lote_tipico_zona1.png)
+lote_tipico_zona2.png
+![](plots/lote_tipico_zona2.png)
+lote_tipico_zona3.png
+![](plots/lote_tipico_zona3.png)
+lote_tipico_zona4.png
+![](plots/lote_tipico_zona4.png)
+lote_tipico_zona5.png
+![](plots/lote_tipico_zona5.png)
 
 ## Superficie por zona / regional / campaña
-
-```{r}
-knitr::include_graphics(here::here("plots", "sup_campana_zona.png"))
-```
+sup_campana_zona.png
+![](plots/sup_campana_zona.png)
 
 ## Area de siembra de GM por zona y tipo de cultivo de soja
+tortas_soja_GM.png
+![](plots/tortas_soja_GM.png)
 
-```{r}
-knitr::include_graphics(here::here("plots", "tortas_soja_GM.png"))
-```
+## Tree maps
+sup_sj.png
+![](plots/sup_sj.png)
 
-```{r}
-knitr::include_graphics(here::here("plots", "sup_sj.png"))
-```
+sup_sj1.png
+![](plots/sup_sj1.png)
 
+sup_sj1_GM3.png
+![](plots/sup_sj1_GM3.png)
 
-```{r}
-knitr::include_graphics(here::here("plots", "sup_sj1.png"))
-```
+sup_sj1_GM4.png
+![](plots/sup_sj1_GM4.png)
 
-```{r}
-knitr::include_graphics(here::here("plots", "sup_sj1_GM3.png"))
-knitr::include_graphics(here::here("plots", "sup_sj1_GM4.png"))
-knitr::include_graphics(here::here("plots", "sup_sj1_GM5.png"))
-knitr::include_graphics(here::here("plots", "sup_sj1_GM6.png"))
+sup_sj1_GM5.png
+![](plots/sup_sj1_GM5.png)
 
-```
+sup_sj1_GM6.png
+![](plots/sup_sj1_GM6.png)
 
-```{r}
-knitr::include_graphics(here::here("plots", "sup_sj2.png"))
-```
+sup_sj2.png
+![](plots/sup_sj2.png)
 
+## Adopcion de tencologias
 
+evolucion_RR.png
+![](plots/evolucion_RR.png)
 
+evolucion_STS.png
+![](plots/evolucion_STS.png)
 
 # Manejo 
 
 ## Ventanas de siembra por zona / GM
 
-```{r}
-knitr::include_graphics(here::here("plots", "ventanas_siembra_campana.png"))
-```
+ventanas_siembra_campana.png
+![](plots/ventanas_siembra_campana.png)
 
 ### Soja 1° 
 
-```{r}
-knitr::include_graphics(here::here("plots", "ventanas_siembra_sj1_GM.png"))
-```
+ventanas_siembra_sj1_GM.png
+![](plots/ventanas_siembra_sj1_GM.png)
 
-```{r}
-knitr::include_graphics(here::here("plots", "ventanas_siembra_sj1_GM_campana.png"))
-```
+ventanas_siembra_sj1_GM_campana.png
+![](plots/ventanas_siembra_sj1_GM_campana.png)
+
 
 ### Soja 2° 
 
-```{r}
-knitr::include_graphics(here::here("plots", "ventanas_siembra_sj2.png"))
-```
+ventanas_siembra_sj2.png
+![](plots/ventanas_siembra_sj2.png)
 
 ## Rendimientos por fecha de siembra x zona
 
@@ -112,36 +101,29 @@ knitr::include_graphics(here::here("plots", "ventanas_siembra_sj2.png"))
 
 ### Soja 1°
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-knitr::include_graphics(here::here("plots", "rinde_Fsiembra_sj1.png"))
-```
+rinde_Fsiembra_sj1.png
+![](plots/rinde_Fsiembra_sj1.png)
 
 ### Soja 2°
 
-```{r}
-knitr::include_graphics(here::here("plots", "rinde_Fsiembra_sj2.png"))
-```
+rinde_Fsiembra_sj2.png
+![](plots/rinde_Fsiembra_sj2.png)
 
 ## Efecto Antecesor
 
 ### Con efecto napa
 
-```{r}
-knitr::include_graphics(here::here("plots", "efecto_antecesor_napa.png"))
-
-```
+efecto_antecesor_napa.png
+![](plots/efecto_antecesor_napa.png)
 
 ### Sin efecto napa
 
-```{r}
-knitr::include_graphics(here::here("plots", "efecto_antecesor.png"))
-```
-
+efecto_antecesor.png
+![](plots/efecto_antecesor.png)
 
 # Variedades
 
 ## Potencial ambiente
 
-```{r}
-knitr::include_graphics(here::here("plots", "potencial_ambiente.png"))
-```
+potencial_ambiente.png
+![](plots/potencial_ambiente.png)

@@ -34,7 +34,7 @@ dat %>%
   theme_bw()%+replace% 
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_campana.png", width = 5.5, height = 4)
+ggsave(last_plot(), file = "plots/ventanas_siembra_campana.png", width = 5, height = 4)
 
 ```
 
@@ -57,7 +57,7 @@ dat %>%
   theme_bw()%+replace% 
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM.png", width = 5.5, height = 4)
+ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM.png", width = 5, height = 4)
 
 ```
 
@@ -80,9 +80,7 @@ dat %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM_campana.png", width = 5.5, height = 4)
-
 ```
-
 
 ### Soja 2° 
 
@@ -123,16 +121,17 @@ dat %>% drop_na(rinde) %>%
   facet_grid(zona~., scales="free_x")+
   geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
   scale_x_date(date_breaks = "15 day", date_labels =  "%d-%b")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
-  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
+   theme_bw(base_size = 12) %+replace% 
+  theme(plot.title = element_text(hjust = 1.5, vjust = 1))
 
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", width = 5.5, height = 4)
+ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", width = 5, height = 4)
 
 ```
 
 Soja 2°
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r}
 dat %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31',
@@ -147,19 +146,20 @@ dat %>%
   facet_grid(zona~., scales="free_x")+
   geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
   scale_x_date(date_breaks = "15 day", date_labels =  "%d-%b")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
-  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)")
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
+     theme_bw(base_size = 12) %+replace% 
+  theme(plot.title = element_text(hjust = 1.5, vjust = 1))
 
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", width = 5.5, height = 4)
+ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", width = 5, height = 4)
 ```
 
-
+# Efecto Antecesor
 
 ```{r}
 pacman::p_load(tidyverse, googlesheets4)
 gs4_auth()
 soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
-gs4_browse(soja)
+# gs4_browse(soja)
 cs_bar <- read_sheet(soja, sheet = "CS_vs_barbecho") %>%  
   janitor::clean_names() %>% 
   mutate_if(is.character, as.factor) 
@@ -169,15 +169,42 @@ cs_bar <- read_sheet(soja, sheet = "CS_vs_barbecho") %>%
 glimpse(cs_bar)
 ```
 
+Con efecto Napa
+
 ```{r}
 cs_bar %>% 
   mutate(napa = str_squish(str_to_upper(gsub(',', '\\.', napa)))) %>% 
   drop_na(napa) %>% 
-  ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha)) +   geom_point()+
+  ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha, col = napa)) +   geom_point()+
+  geom_smooth(method="lm", se = F)+
+  geom_abline(intercept = 0, slope = 1, linetype = 2)+
+  labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)", col = "Napa")+
+  facet_grid(campana ~ .)+ 
+  theme_bw()
+
+ggsave(last_plot(), file = "plots/efecto_antecesor_napa.png", width = 4, height = 4)
+```
+
+
+```{r}
+cs_bar %>% 
+  mutate(napa = str_squish(str_to_upper(gsub(',', '\\.', napa)))) %>% 
+  drop_na(napa) %>% 
+  ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha)) + 
+  geom_point()+
   geom_smooth(method="lm", se = F)+
   geom_abline(intercept = 0, slope = 1, linetype = 2)+
   labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)")+
-  facet_grid(campana ~ .)
+  facet_grid(campana ~ .)+
+  theme_bw()
+
+ggsave(last_plot(), file = "plots/efecto_antecesor.png", width = 4, height = 4)
+```
+
+Fosforo
+
+```{r}
 
 ```
+
 
