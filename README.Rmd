@@ -35,14 +35,15 @@ sup_campana_zona.png
 
 ## Soja 1era / soja 2°
 
+sup_sj.png
+![](plots/sup_sj.png)
+
 ## Grupos de madurez
 
 tortas_soja_GM.png
 ![](plots/tortas_soja_GM.png)
 
 
-sup_sj.png
-![](plots/sup_sj.png)
 
 sup_sj1.png
 ![](plots/sup_sj1.png)
