@@ -6,7 +6,7 @@ always_allow_html: true
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(
-  collapse = F, echo = T, message=FALSE, warning=FALSE,
+  collapse = F, echo = F, message=FALSE, warning=FALSE,
   comment = "#>",
   out.width = "50%")
 library(knitr)
@@ -24,57 +24,23 @@ library(knitr)
   * [Superficie](#superficie)
   * [Performance](#performance)
 
-[Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
+[Carpeta con Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
 
-[Datos](https://github.com/juanchiem/soybean/tree/master/data) 
+[Link a datos](https://github.com/juanchiem/soybean/tree/master/data) 
 
 # Distribución de superficie
+
+sup_campana_zona.png
+![](plots/sup_campana_zona.png)
 
 ## Soja 1era / soja 2°
 
 ## Grupos de madurez
 
-## Biotecnologías 
-
-# Manejo
-
-## Fecha de siembra
-
-## Cultivo antecesor
-
-## Fósforo
-
-# Variedades
-
-## Superficie
-    
-## Performance
-
-
-
-
-```{r message=FALSE, warning=FALSE, include=FALSE}
-# pacman::p_load(tidyverse) 
-# dat <- read_csv(here::here("data/clean_data.csv"))
-# load(here::here("soy_dat.Rdata"))
-```
-
-
-# Superficies
-
-## Superficie por zona / regional / campaña
-sup_campana_zona.png
-![](plots/sup_campana_zona.png)
-
-```{r}
-include_graphics("plots/sup_campana_zona.png")
-```
-
-## Area de siembra de GM por zona y tipo de cultivo de soja
 tortas_soja_GM.png
 ![](plots/tortas_soja_GM.png)
 
-## Tree maps
+
 sup_sj.png
 ![](plots/sup_sj.png)
 
@@ -96,17 +62,26 @@ sup_sj1_GM6.png
 sup_sj2.png
 ![](plots/sup_sj2.png)
 
-## Adopcion de tencologias
+## Biotecnologías 
 
 evolucion_RR.png
 ![](plots/evolucion_RR.png)
 
+
 evolucion_STS.png
 ![](plots/evolucion_STS.png)
 
-# Manejo 
+# Manejo
 
-## Ventanas de siembra por zona / GM
+## Lote medio de cada zona  (2017-2020)
+
+```{r lotes_tipicos}
+lotes_tipicos <- list.files("plots", pattern = "lote_tipico", full.names = TRUE)
+include_graphics(lotes_tipicos)
+print(opts_current$get()$label)
+```
+
+## Fecha de siembra
 
 ventanas_siembra_campana.png
 ![](plots/ventanas_siembra_campana.png)
@@ -118,11 +93,6 @@ ventanas_siembra_sj1_GM.png
 
 ventanas_siembra_sj1_GM_campana.png
 ![](plots/ventanas_siembra_sj1_GM_campana.png)
-
-fosforo_respuesta18.png
-![](plots/fosforo_respuesta18.png)
-
-
 
 ### Soja 2° 
 
@@ -143,7 +113,7 @@ rinde_Fsiembra_sj1.png
 rinde_Fsiembra_sj2.png
 ![](plots/rinde_Fsiembra_sj2.png)
 
-## Efecto Antecesor
+## Cultivo antecesor
 
 ### Con efecto napa
 
@@ -155,7 +125,8 @@ efecto_antecesor_napa.png
 efecto_antecesor.png
 ![](plots/efecto_antecesor.png)
 
-## Fósforo 
+## Fósforo
+
 fosforo_respuesta.png
 ![](plots/fosforo_respuesta.png)
 

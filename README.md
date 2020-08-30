@@ -13,49 +13,20 @@ Análisis de campaña
       - [Superficie](#superficie)
       - [Performance](#performance)
 
-[Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
+[Carpeta con
+Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
 
-[Datos](https://github.com/juanchiem/soybean/tree/master/data)
+[Link a datos](https://github.com/juanchiem/soybean/tree/master/data)
 
 # Distribución de superficie
+
+sup\_campana\_zona.png ![](plots/sup_campana_zona.png)
 
 ## Soja 1era / soja 2°
 
 ## Grupos de madurez
 
-## Biotecnologías
-
-# Manejo
-
-## Fecha de siembra
-
-## Cultivo antecesor
-
-## Fósforo
-
-# Variedades
-
-## Superficie
-
-## Performance
-
-# Superficies
-
-## Superficie por zona / regional / campaña
-
-sup\_campana\_zona.png ![](plots/sup_campana_zona.png)
-
-``` r
-include_graphics("plots/sup_campana_zona.png")
-```
-
-<img src="plots/sup_campana_zona.png" width="50%" />
-
-## Area de siembra de GM por zona y tipo de cultivo de soja
-
 tortas\_soja\_GM.png ![](plots/tortas_soja_GM.png)
-
-## Tree maps
 
 sup\_sj.png ![](plots/sup_sj.png)
 
@@ -71,7 +42,7 @@ sup\_sj1\_GM6.png ![](plots/sup_sj1_GM6.png)
 
 sup\_sj2.png ![](plots/sup_sj2.png)
 
-## Adopcion de tencologias
+## Biotecnologías
 
 evolucion\_RR.png ![](plots/evolucion_RR.png)
 
@@ -79,7 +50,13 @@ evolucion\_STS.png ![](plots/evolucion_STS.png)
 
 # Manejo
 
-## Ventanas de siembra por zona / GM
+## Lote medio de cada zona (2017-2020)
+
+<img src="plots/lote_tipico_zona1.png" width="50%" /><img src="plots/lote_tipico_zona2.png" width="50%" /><img src="plots/lote_tipico_zona3.png" width="50%" /><img src="plots/lote_tipico_zona4.png" width="50%" /><img src="plots/lote_tipico_zona5.png" width="50%" />
+
+    #> [1] "lotes_tipicos"
+
+## Fecha de siembra
 
 ventanas\_siembra\_campana.png ![](plots/ventanas_siembra_campana.png)
 
@@ -89,8 +66,6 @@ ventanas\_siembra\_sj1\_GM.png ![](plots/ventanas_siembra_sj1_GM.png)
 
 ventanas\_siembra\_sj1\_GM\_campana.png
 ![](plots/ventanas_siembra_sj1_GM_campana.png)
-
-fosforo\_respuesta18.png ![](plots/fosforo_respuesta18.png)
 
 ### Soja 2°
 
@@ -109,7 +84,7 @@ rinde\_Fsiembra\_sj1.png ![](plots/rinde_Fsiembra_sj1.png)
 
 rinde\_Fsiembra\_sj2.png ![](plots/rinde_Fsiembra_sj2.png)
 
-## Efecto Antecesor
+## Cultivo antecesor
 
 ### Con efecto napa
 

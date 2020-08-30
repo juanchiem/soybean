@@ -376,11 +376,10 @@ sts_sum %>%
              !tecno_sts== "NO OMG") %>% 
       drop_na(tecno_sts),
     aes(label = paste0("Zona ", zona)), size =3, nudge_x = 0.1) +
-  theme_bw(base_size = 12)
+  theme_bw()
   # theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   
-ggsave(last_plot(), file = "plots/evolucion_STS.png", 
-        w=60, h=50, units="mm", dpi=300, scale=2)
+ggsave(last_plot(), file = "plots/evolucion_STS.png", w =6, h=3)
 ```
 
 
