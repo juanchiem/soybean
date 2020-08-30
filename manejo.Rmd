@@ -159,7 +159,7 @@ ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", width = 5, height = 4
 pacman::p_load(tidyverse, googlesheets4)
 gs4_auth()
 soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
-# gs4_browse(soja)
+gs4_browse(soja)
 cs_bar <- read_sheet(soja, sheet = "CS_vs_barbecho") %>%  
   janitor::clean_names() %>% 
   mutate_if(is.character, as.factor) 
@@ -180,31 +180,202 @@ cs_bar %>%
   geom_abline(intercept = 0, slope = 1, linetype = 2)+
   labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)", col = "Napa")+
   facet_grid(campana ~ .)+ 
-  theme_bw()
+  coord_fixed(ratio = 1 / 1)+
+  expand_limits(x = 0, y = 0)+
+  theme_bw()%+replace%theme(plot.margin=grid::unit(c(1,0,0,0), "mm"))
 
-ggsave(last_plot(), file = "plots/efecto_antecesor_napa.png", width = 4, height = 4)
+ggsave(last_plot(), file = "plots/efecto_antecesor_napa.png")
 ```
 
 
 ```{r}
 cs_bar %>% 
-  mutate(napa = str_squish(str_to_upper(gsub(',', '\\.', napa)))) %>% 
-  drop_na(napa) %>% 
   ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha)) + 
   geom_point()+
   geom_smooth(method="lm", se = F)+
   geom_abline(intercept = 0, slope = 1, linetype = 2)+
   labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)")+
   facet_grid(campana ~ .)+
-  theme_bw()
+  coord_fixed(ratio = 1 / 1)+
+  expand_limits(x = 0, y = 0)+
+  theme_bw()%+replace%theme(plot.margin=grid::unit(c(1,0,0,0), "mm"))
 
-ggsave(last_plot(), file = "plots/efecto_antecesor.png", width = 4, height = 4)
+ggsave(last_plot(), file = "plots/efecto_antecesor.png")
 ```
 
-Fosforo
+```{r}
+cs_bar17 <- cs_bar %>% filter(campana == "2017/18") 
+
+tmp.ccc <- epi.ccc(cs_bar17$rendimiento_antecesor_cs_qq_ha,
+                   cs_bar17$rendimiento_antecesor_barbecho_qq_ha, 
+                   ci = "z-transform", conf.level = 0.95, 
+                   rep.measure = FALSE)
+
+
+tmp.lab <- data.frame(lab = paste("CCC: ", 
+                                  round(tmp.ccc$rho.c[,1], digits = 2), " (95% CI ", 
+                                  round(tmp.ccc$rho.c[,2], digits = 2), " - ",
+                                  round(tmp.ccc$rho.c[,3], digits = 2), ")", sep = ""))
+
+z <- lm(cs_bar17$rendimiento_antecesor_cs_qq_ha~cs_bar17$rendimiento_antecesor_barbecho_qq_ha)
+alpha <- summary(z)$coefficients[1,1]
+beta <-  summary(z)$coefficients[2,1]
+tmp.lm <- data.frame(alpha, beta)
+
+ggplot(cs_bar17, aes(x=rendimiento_antecesor_cs_qq_ha, 
+                     y=rendimiento_antecesor_barbecho_qq_ha)) + 
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_abline(data = tmp.lm, aes(intercept = alpha, slope = beta), 
+              linetype = "dashed") +
+  xlim(0, 3) +
+  ylim(0, 3) +
+  xlab("Method 1") +
+  ylab("Method 2") +
+  geom_text(data = tmp.lab, x = 0.5, y = 2.95, label = tmp.lab$lab) + 
+  coord_fixed(ratio = 1 / 1)
+```
+
+# Fosforo
 
 ```{r}
+pacman::p_load(tidyverse, googlesheets4)
+gs4_auth()
+soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
 
+fosf <- read_sheet(soja, sheet = "Fosforo") %>%  
+  janitor::clean_names() %>% 
+  mutate_if(is.character, as.factor) %>% 
+    filter(dosis_kg_ha<180, 
+         # dosis_kg_ha>10, 
+         p_bray_ppm<60, 
+         rendimiento_qq_ha>20) 
+```
+
+```{r}
+fosf %>%  
+  ggplot(aes(dosis_kg_ha, rendimiento_qq_ha, col = fertilizante))+
+  geom_point()+
+  geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  theme_bw()+
+  facet_wrap("fertilizante", scales =  "free_x")+
+  guides(col = "none")+
+  labs(x = "Dosis  fertilizante (kg/ha)", y = "Rendimiento (qq/ha)")
+
+ggsave(last_plot(), file = "plots/fosforo_respuesta.png")
+```
+
+```{r}
+fosf %>%  
+  ggplot(aes(p_bray_ppm, rendimiento_qq_ha, col = fertilizante))+
+  geom_point()+
+  geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  theme_bw()+
+  facet_wrap("fertilizante", scales =  "free_x")+
+  guides(col = "none")+
+  labs(x = "Dosis  fertilizante (kg/ha)", y = "Rendimiento (qq/ha)")
+ggsave(last_plot(), file = "plots/fosforo_respuesta.png")
+```
+
+```{r}
+fosf %>%  
+  mutate(P_bray12 = if_else(p_bray_ppm < 12, "P_bray < 12", "P_bray > 12")) %>% 
+  ggplot(aes(p_bray_ppm, rendimiento_qq_ha, col = fertilizante))+
+  geom_point()+
+  geom_smooth(se = F, 
+              method = 'lm'
+              ) +
+  theme_bw()+
+  facet_wrap("P_bray12", scales =  "free_x")+
+  # guides(col = "none")+
+  labs(x = "Dosis  fertilizante (kg/ha)", y = "Rendimiento (qq/ha)")
+
+ggsave(last_plot(), file = "plots/fosforo_respuesta12.png")
+```
+
+
+```{r}
+fosf %>%  
+  mutate(P_bray18 = if_else(p_bray_ppm < 18, "P_bray < 18", "P_bray > 18")) %>% 
+  ggplot(aes(p_bray_ppm, rendimiento_qq_ha, col = fertilizante))+
+  geom_point()+
+  geom_smooth(se = F, 
+              method = 'lm'
+              ) +
+  theme_bw()+
+  facet_wrap("P_bray18", scales =  "free_x")+
+  # guides(col = "none")+
+  labs(x = "Dosis  fertilizante (kg/ha)", y = "Rendimiento (qq/ha)")
+
+ggsave(last_plot(), file = "plots/fosforo_respuesta18.png")
+
+```
+
+
+
+```{r}
+fosf %>% 
+  ggplot(aes(fertilizante, dosis_kg_ha, fill = fertilizante))+
+  geom_boxplot()+
+  theme_bw()+
+  guides(fill = "none")+
+  labs(x = "Fertilizante", y = "Dosis (kg/ha)")+
+  
+ggsave(last_plot(), file = "plots/fosforo_dosis.png")
+```
+
+```{r}
+fosf %>% 
+  # drop_na(p_bray_ppm) %>% 
+  ggplot(aes(rendimiento_qq_ha, balance_p_kg_ha, col = fertilizante))+ 
+  geom_point()+
+  labs( x = "Rendimiento (qq/ha)", 
+       y = "Balance fósforo (kg/ha)",
+       col = "Fertilizante")+
+  theme_bw()+
+  geom_hline(yintercept = 0)+
+  coord_fixed(ratio = 1 / 1)
+
+  # guides(col = "none")
+ggsave(last_plot(), file = "plots/balance_fosforo.png")
+```
+
+
+
+
+```{r}
+library(segmented)
+
+fosf1 <- 
+  fosf %>% 
+    drop_na(p_bray_ppm) %>% 
+  dplyr::filter(
+    dosis_kg_ha<180, 
+         dosis_kg_ha>10, 
+         p_bray_ppm<60, 
+         p_bray_ppm>5, 
+         rendimiento_qq_ha>20,
+         fertilizante == "MAP") %>% 
+  arrange(p_bray_ppm)
+
+fosf1 %>% ggplot(aes(p_bray_ppm, rendimiento_qq_ha))+
+  geom_text(aes(label=p_bray_ppm))
+
+fit <- lm(rendimiento_qq_ha ~ p_bray_ppm, 
+            data =fosf1)
+segfit <- segmented(fit)
+summary(segfit)
+
+plot(fosf1$p_bray_ppm, fosf1$rendimiento_qq_ha)  
+plot(segfit, add=TRUE)
+```
+
+
+```{r}
+```
+
+
+```{r}
 ```
 
 

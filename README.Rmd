@@ -1,16 +1,57 @@
 ---
 output: github_document
+title: Análisis de campaña
 always_allow_html: true
 ---
-
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(
   collapse = F, echo = T, message=FALSE, warning=FALSE,
   comment = "#>",
-  out.width = "50%",
-  dpi = 50)
+  out.width = "50%")
+library(knitr)
 ```
+
+- [Distribución de superficie](#distribuci-n-de-superficie)
+  * [Soja 1era / soja 2°](#soja-1era---soja-2-)
+  * [Grupos de madurez](#grupos-de-madurez)
+  * [Biotecnologías](#biotecnolog-as)
+- [Manejo](#manejo)
+  * [Fecha de siembra](#fecha-de-siembra)
+  * [Cultivo antecesor](#cultivo-antecesor)
+  * [Fósforo](#f-sforo)
+- [Variedades](#variedades)
+  * [Superficie](#superficie)
+  * [Performance](#performance)
+
+[Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
+
+[Datos](https://github.com/juanchiem/soybean/tree/master/data) 
+
+# Distribución de superficie
+
+## Soja 1era / soja 2°
+
+## Grupos de madurez
+
+## Biotecnologías 
+
+# Manejo
+
+## Fecha de siembra
+
+## Cultivo antecesor
+
+## Fósforo
+
+# Variedades
+
+## Superficie
+    
+## Performance
+
+
+
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 # pacman::p_load(tidyverse) 
@@ -18,28 +59,16 @@ knitr::opts_chunk$set(
 # load(here::here("soy_dat.Rdata"))
 ```
 
-- [carpeta de imágenes](https://github.com/juanchiem/soybean/tree/master/plots)
-
-- [carpeta de datos](https://github.com/juanchiem/soybean/tree/master/data) 
 
 # Superficies
-
-## Lote medio de cada zona  (2017-2020)
-
-lote_tipico_zona1.png
-![](plots/lote_tipico_zona1.png)
-lote_tipico_zona2.png
-![](plots/lote_tipico_zona2.png)
-lote_tipico_zona3.png
-![](plots/lote_tipico_zona3.png)
-lote_tipico_zona4.png
-![](plots/lote_tipico_zona4.png)
-lote_tipico_zona5.png
-![](plots/lote_tipico_zona5.png)
 
 ## Superficie por zona / regional / campaña
 sup_campana_zona.png
 ![](plots/sup_campana_zona.png)
+
+```{r}
+include_graphics("plots/sup_campana_zona.png")
+```
 
 ## Area de siembra de GM por zona y tipo de cultivo de soja
 tortas_soja_GM.png
@@ -141,7 +170,6 @@ fosforo_respuesta12.png
 
 fosforo_respuesta18.png
 ![](plots/fosforo_respuesta18.png)
-
 
 # Variedades
 

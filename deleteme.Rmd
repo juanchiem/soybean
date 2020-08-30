@@ -1,0 +1,37 @@
+---
+title: "Analisis de campana"
+output: html_document
+---
+```{r include = FALSE}
+knitr::opts_chunk$set(
+  collapse = F, echo = T, message=FALSE, warning=FALSE,
+  comment = "#>",
+  out.width = "10%")
+library(knitr)
+```
+
+
+# Table of Contents
+1. [Example 1](#example-1)
+2. [Example 2](#example-2)
+  * [Soja 1° / soja 2°](#Soja-1°-/-soja-2°)
+    + [Sub-sub-heading](#sub-sub-heading)
+3. [Third Example](#third-example)
+4. [Fourth Example](#fourth-examplehttpwwwfourthexamplecom)
+
+
+## Example 1
+
+
+```{r}
+include_graphics("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/MC_Drei-Finger-Faultier.jpg/330px-MC_Drei-Finger-Faultier.jpg")
+```
+
+## Example 2
+
+```{r}
+include_graphics("sup_sj.png")
+```
+
+## Third Example
+## [Fourth Example](http://www.fourthexample.com) 

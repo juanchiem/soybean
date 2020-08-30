@@ -51,35 +51,31 @@ dat1 <- left_join(x=dat, y=potencial_ambiente,
   mutate_if(is.character, as.factor) %>% 
   mutate(razon_rinde = rinde/rinde_50) 
 
-dat1 %>% 
-  filter(campana == "2017/18", 
-         cultivo == "soja_1") %>% 
-  ggplot(aes(variedad, razon_rinde))+
-  geom_boxplot()+
-  facet_wrap("zona", scales = "free")
 ```
 
 
 ```{r}
-potencial_ambiente <- 
-
 dat %>% 
   filter(dano_tot == 0, 
          rinde > 4, 
          riego == "NO", 
          cultivo == "soja_1") %>%
-  group_by(campana, zona, variedad) %>%
+  group_by(campana, zona, cultivo, variedad) %>%
   summarise(var_sup = sum(superficie, na.rm = TRUE),
             rinde50 = median(rinde, na.rm = TRUE),
             .groups = 'drop') %>%   
-  group_by(variedad) %>% 
+  group_by(zona, cultivo, variedad) %>% 
   mutate(flag=n_distinct(campana)) %>%
   filter(flag==3) %>% 
-  group_by(zona, variedad) %>%
-  mutate(sup=sum(var_sup)) %>% 
-  filter(sup>500) %>% 
-  mutate_if(is.character, as.factor) %>% 
-  droplevels() -> dat_top # soja de 1°, sembrada en los 3 años en mas de 500 ha
+  arrange(campana, zona, cultivo, variedad) %>% 
+  group_by(zona, cultivo, variedad) %>%
+  summarise(sup=sum(var_sup)) %>% ungroup() %>% 
+  arrange(zona, cultivo, variedad, sup) %>% 
+  group_by(zona, cultivo, variedad) %>% 
+  slice_max(order_by = sup, n = 5) %>% 
+   mutate_if(is.character, as.factor) %>% 
+  droplevels() %>% 
+  arrange(campana, zona, cultivo)-> dat_top # soja de 1° o 2°, sembrada en los 3 años en mas de 500 ha
   
 # dat_top %>% 
 #   ggplot(aes(x = campana, y = rinde_mediano))+
@@ -87,6 +83,15 @@ dat %>%
 #   geom_line(aes(group = variedad, col = variedad))
 
 dat_top %>% distinct(variedad) %>% pull() -> var_names
+```
+
+```{r}
+dat1 %>% 
+  filter(variedad %in% var_names)  %>% 
+  group_by(campana, zona, cultivo) %>%
+  summarise(rinde_50 = median(rinde, na.rm = TRUE),
+            rinde_95 = quantile(rinde, 0.95, na.rm = TRUE),
+            .groups = 'drop') -> potencial_ambiente #rendimiento mediano de año/zona/cultivo
 ```
 
 Como primer abordaje analizaremos por zona, solo aquellos cultivares:  

@@ -1,23 +1,55 @@
+Análisis de campaña
+================
 
-  - [carpeta de
-    imágenes](https://github.com/juanchiem/soybean/tree/master/plots)
+  - [Distribución de superficie](#distribuci-n-de-superficie)
+      - [Soja 1era / soja 2°](#soja-1era---soja-2-)
+      - [Grupos de madurez](#grupos-de-madurez)
+      - [Biotecnologías](#biotecnolog-as)
+  - [Manejo](#manejo)
+      - [Fecha de siembra](#fecha-de-siembra)
+      - [Cultivo antecesor](#cultivo-antecesor)
+      - [Fósforo](#f-sforo)
+  - [Variedades](#variedades)
+      - [Superficie](#superficie)
+      - [Performance](#performance)
 
-  - [carpeta de
-    datos](https://github.com/juanchiem/soybean/tree/master/data)
+[Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
+
+[Datos](https://github.com/juanchiem/soybean/tree/master/data)
+
+# Distribución de superficie
+
+## Soja 1era / soja 2°
+
+## Grupos de madurez
+
+## Biotecnologías
+
+# Manejo
+
+## Fecha de siembra
+
+## Cultivo antecesor
+
+## Fósforo
+
+# Variedades
+
+## Superficie
+
+## Performance
 
 # Superficies
-
-## Lote medio de cada zona (2017-2020)
-
-lote\_tipico\_zona1.png ![](plots/lote_tipico_zona1.png)
-lote\_tipico\_zona2.png ![](plots/lote_tipico_zona2.png)
-lote\_tipico\_zona3.png ![](plots/lote_tipico_zona3.png)
-lote\_tipico\_zona4.png ![](plots/lote_tipico_zona4.png)
-lote\_tipico\_zona5.png ![](plots/lote_tipico_zona5.png)
 
 ## Superficie por zona / regional / campaña
 
 sup\_campana\_zona.png ![](plots/sup_campana_zona.png)
+
+``` r
+include_graphics("plots/sup_campana_zona.png")
+```
+
+<img src="plots/sup_campana_zona.png" width="50%" />
 
 ## Area de siembra de GM por zona y tipo de cultivo de soja
 
