@@ -6,7 +6,7 @@ editor_options:
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-pacman::p_load(tidyverse, ggplotFL) 
+pacman::p_load(tidyverse) 
 # dat <- read_csv(here::here("data/clean_data.csv"))
 load(here::here("soy_dat.Rdata"))
 ```
@@ -210,7 +210,7 @@ dat %>% drop_na(rinde) %>%
   theme_bw(base_size = 13) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1), 
         legend.position = "top")
-ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png", w=3.5, h=5)
+ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png")
 
 ```
 
