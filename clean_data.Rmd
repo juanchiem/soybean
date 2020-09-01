@@ -22,7 +22,7 @@ raw_dat <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1
 gs4_auth()
 soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
 gs4_browse(soja)
-raw_dat <- read_sheet(soja, sheet = "raw", range = "A1:AW2708")
+raw_dat <- read_sheet(soja, sheet = "raw")
 raw_dat <- janitor::clean_names(raw_dat)
 ```
 
@@ -40,13 +40,14 @@ dat <- raw_dat %>%
          clase_de_suelo,
          cultivo, superficie, 
          rinde = rendimiento_qq_ha,
-         antecesor_invernal_18_1, 
+         antecesor = antecesor_invernal_18_1, 
          antecesor_estival_17_18, 
          fecha_siembra =fecha_de_siembra_dia_mes, 
          variedad, 
          tecno_herbicidas = biotecnologia_herbicidas,
          tecno_rr = tecnologia_rr, 
          tecno_sts = tecnologia_sts, 
+         intacta = tecnologia_lepidopteros, 
          GM = grupo_de_madurez, semillero, 
          espaciamiento_cm, densidad, 
          riego, napa, agua_inicio=estado_del_perfil_a_la_siembra,  
@@ -61,8 +62,8 @@ dat <- raw_dat %>%
          dano_2 = as.numeric(replace_na(dano_2, '0')),
          dano_tot = dano_1 + dano_2,
          cultivo = recode(cultivo,  # cambios manuales
-                           'Soja 1°'= 'soja_1',
-                           'Soja 2°'= 'soja_2')) %>% 
+                          'Soja 1°'= 'soja_1',
+                          'Soja 2°'= 'soja_2')) %>% 
   mutate(regional = str_trim(string = regional),
          regional = str_to_title(regional), # capital letters
          regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
@@ -71,20 +72,20 @@ dat <- raw_dat %>%
                            Montecristo = "Monte Cristo",
                            "Los Surgentes Inriville" = "Los Surgentes-Inriville",
                            "Los Surgentes" = "Los Surgentes-Inriville")) %>% 
-   mutate(
+  mutate(
     variedad = stringi::stri_trans_general(variedad,"Latin-ASCII"),
     variedad = str_replace_all(variedad, c('STS|IPRO'), ""),
     variedad = str_to_upper(gsub(',', '\\.', variedad)),
     variedad = str_replace_all(variedad, pattern=" ", repl="")) %>% 
-  
+  mutate(antecesor = str_to_upper(gsub(',', '\\.', antecesor))) %>% 
   mutate(
     tecno_herbicidas = str_to_upper(gsub(',', '\\.', tecno_herbicidas)), 
     tecno_rr = str_to_upper(gsub(',', '\\.', tecno_rr)), 
     tecno_sts = str_to_upper(gsub(',', '\\.', tecno_sts))) %>% 
   mutate(riego = str_to_upper(gsub(',', '\\.', riego))) # %>% 
-  
-  # mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
-  # mutate(id_row = 1:nrow(.))
+
+# mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
+# mutate(id_row = 1:nrow(.))
 ```
 
 ```{r}
@@ -166,6 +167,6 @@ dat %>%
 ```
 
 ```{r}
-save(raw_dat, dat, var_name, file = here::here("soy_dat.Rdata"))
+save(raw_dat, dat, var_name, file = here::here("data/soy_dat.Rdata"))
 # write_csv(dat_git, "data/clean_data.csv")
 ```

@@ -1,14 +1,12 @@
 ---
 title: "Manejo"
-output: html_notebook
-editor_options: 
-  chunk_output_type: console
+output: html_document
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
 # dat <- read_csv(here::here("data/clean_data.csv"))
-load(here::here("soy_dat.Rdata"))
+load(here::here("data/soy_dat.Rdata"))
 ```
 
 ## Ventanas de siembra por zona / GM
@@ -105,7 +103,6 @@ dat %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 ggsave(last_plot(), file = "plots/ventanas_siembra_sj2.png", width = 5.5, height = 4)
-
 ```
 
 ## Rendimientos por fecha de siembra x zona
@@ -137,7 +134,7 @@ ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", w=3.5, h=5)
 
 Zona 1 x GM
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r}
 dat %>% drop_na(rinde) %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-29',
@@ -150,10 +147,10 @@ dat %>% drop_na(rinde) %>%
   facet_grid(.~GM, scales="free_x")+
   # geom_smooth(aes(col=campana), se = F, span=1) +
   # geom_smooth(aes(col=campana), method = "lm", formula = y ~ splines::bs(x, 1), se = T) +
-  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  # geom_quantile(aes(col=campana))+
+  # geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  geom_quantile(aes(col=campana))+
   # geom_flquantiles(probs=c(0.90), alpha=0.15)+
-  # geom_quantile(quantiles = 0.8, linetype = 2)+
+  # geom_quantile(aes(col=campana), quantiles = 0.8, linetype = 2)+
   scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
   theme_bw(base_size = 13) +
@@ -180,9 +177,9 @@ dat %>% drop_na(rinde) %>%
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
   facet_grid(.~GM, scales="free_x")+
   # geom_smooth(aes(col=campana), se = F, span=1) +
-  # geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 1)) +
-  geom_quantile(aes(col=campana), quantiles = 0.5)+
-  geom_quantile(aes(col=campana), quantiles = 0.90, linetype = 2)+
+  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  # geom_quantile(aes(col=campana), quantiles = 0.5)+
+  # geom_quantile(aes(col=campana), quantiles = 0.90, linetype = 2)+
   scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
   theme_bw(base_size = 13) +
@@ -207,13 +204,12 @@ dat %>% drop_na(rinde) %>%
   facet_grid(zona ~ campana, scales="free_x")+
   geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
   labs(x = "GM", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.position = "top")
-ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png")
+  theme_bw(base_size = 13) 
+  # theme(axis.text.x = element_text(angle = 60, hjust = 1), 
+        # legend.position = "top")
+ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png", w =5, h = 5)
 
 ```
-
 
 
 Soja 2°
@@ -241,222 +237,32 @@ dat %>%
 ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", w=3, h=5)
 ```
 
-# Efecto Antecesor
 
 ```{r}
-pacman::p_load(tidyverse, googlesheets4)
-gs4_auth()
-soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
-gs4_browse(soja)
-cs_bar <- read_sheet(soja, sheet = "CS_vs_barbecho") %>%  
-  janitor::clean_names() %>% 
-  mutate_if(is.character, as.factor) 
-```
-
-```{r}
-glimpse(cs_bar)
-```
-
-Con efecto Napa
-
-```{r}
-cs_bar %>% 
-  mutate(napa = str_squish(str_to_upper(gsub(',', '\\.', napa)))) %>% 
-  drop_na(napa) %>% 
-  ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha, col = napa)) +   geom_point()+
-  geom_smooth(method="lm", se = F)+
-  geom_abline(intercept = 0, slope = 1, linetype = 2)+
-  labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)", col = "Napa")+
-  facet_grid(.~campana)+ ylim(0,60)+xlim(0,60)+
-  coord_fixed(ratio = 1 / 1)+
-  expand_limits(x = 0, y = 0)+
-  theme_bw()%+replace%theme(legend.position = "top")
-
-ggsave(last_plot(), file = "plots/efecto_antecesor_napa.png")
-```
-
-
-```{r}
-cs_bar %>% 
-  ggplot(aes(rendimiento_antecesor_cs_qq_ha, rendimiento_antecesor_barbecho_qq_ha)) + 
-  geom_point()+
-  geom_smooth(method="lm", se = F)+
-  geom_abline(intercept = 0, slope = 1, linetype = 2)+
-  labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)")+
-  facet_grid(.~campana)+ ylim(0,60)+xlim(0,60)+
-  coord_fixed(ratio = 1 / 1)+
-  expand_limits(x = 0, y = 0)+
-  theme_bw()%+replace%theme(legend.position = "top")
-
-ggsave(last_plot(), file = "plots/efecto_antecesor.png")
-```
-
-```{r}
-cs_bar17 <- cs_bar %>% filter(campana == "2017/18") 
-
-tmp.ccc <- epi.ccc(cs_bar17$rendimiento_antecesor_cs_qq_ha,
-                   cs_bar17$rendimiento_antecesor_barbecho_qq_ha, 
-                   ci = "z-transform", conf.level = 0.95, 
-                   rep.measure = FALSE)
-
-
-tmp.lab <- data.frame(lab = paste("CCC: ", 
-                                  round(tmp.ccc$rho.c[,1], digits = 2), " (95% CI ", 
-                                  round(tmp.ccc$rho.c[,2], digits = 2), " - ",
-                                  round(tmp.ccc$rho.c[,3], digits = 2), ")", sep = ""))
-
-z <- lm(cs_bar17$rendimiento_antecesor_cs_qq_ha~cs_bar17$rendimiento_antecesor_barbecho_qq_ha)
-alpha <- summary(z)$coefficients[1,1]
-beta <-  summary(z)$coefficients[2,1]
-tmp.lm <- data.frame(alpha, beta)
-
-ggplot(cs_bar17, aes(x=rendimiento_antecesor_cs_qq_ha, 
-                     y=rendimiento_antecesor_barbecho_qq_ha)) + 
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1) +
-  geom_abline(data = tmp.lm, aes(intercept = alpha, slope = beta), 
-              linetype = "dashed") +
-  xlim(0, 3) +
-  ylim(0, 3) +
-  xlab("Method 1") +
-  ylab("Method 2") +
-  geom_text(data = tmp.lab, x = 0.5, y = 2.95, label = tmp.lab$lab) + 
-  coord_fixed(ratio = 1 / 1)
-```
-
-# Fosforo
-
-```{r}
-pacman::p_load(tidyverse, googlesheets4)
-gs4_auth()
-soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
-fosf <- read_sheet(soja, sheet = "P") 
-fosf <- fosf  %>%  
-  janitor::clean_names() %>% 
-  mutate_if(is.character, as.factor)  %>% 
-  filter(p_bray_ppm<60, 
-           p_bray_ppm>0) %>% 
-  mutate(producto_1 = recode_factor(producto_1, `s/ferti` = "Testigo" ))
-fosf
-xtabs(~producto_1, data = fosf)
-```
-
-```{r}
-fosf %>% ggplot(aes(p_bray_ppm))+geom_histogram()
-fosf %>% ggplot(aes(dosis_kg_ha))+geom_histogram()
-```
-
-```{r}
-fosf %>%
-  ggplot(aes(producto_1, rendimiento_qq_ha, fill = producto_1))+
-  geom_boxplot()+
-  geom_jitter(alpha=0.5, width = 0.1)+
-  theme_bw()+
-  guides(fill = "none")+
-  labs(x = "Fertilizante fosfatado", y = "Rendimiento (qq/ha)")
-
-ggsave(last_plot(), file = "plots/fosforo_productos.png", w=4, h=3.5)
-```
-
-```{r}
-fosf %>%
-  mutate(P_bray12 = if_else(p_bray_ppm < 12, "P_bray < 12", "P_bray >= 12")) %>% 
-  ggplot(aes(producto_1, rendimiento_qq_ha, fill = producto_1))+
-  geom_boxplot()+
-  geom_jitter(alpha=0.5, width = 0.1)+
-  theme_bw()+
-  facet_wrap("P_bray12", scales =  "free_x")+
-  guides(fill = "none")+
-  labs(x = "Fertilizante fosfatado", y = "Rendimiento (qq/ha)")
-
-ggsave(last_plot(), file = "plots/fosforo_umbral12.png")
+library(lubridate)
+dat %>% drop_na(rinde) %>% 
+  filter(fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_1", zona == 5) %>%
+  #   group_by(fecha_siembra=if_else(day(fecha_siembra) >= 30,
+  #                       floor_date(fecha_siembra, "20 days"),
+  #                       floor_date(fecha_siembra, "10 days"))) %>%
+  # summarize(yield_mean = mean(rinde),
+  #           days = n()) %>%
+  mutate(zona = fct_rev(zona)) %>% 
+  ggplot(aes(x=as.POSIXct(fecha_siembra), y=rinde))+
+  geom_boxplot(aes(colour = GM), varwidth = F)+
+  # geom_point(alpha =0.5, size=0.8)+
+  facet_grid( .~ campana, scales="free_x")+
+  # geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  labs(x = "GM", y = "Rendimiento (qq/ha)", col ="")+
+  theme_bw(base_size = 13) +
+  scale_x_datetime(breaks = date_breaks("15 days")) 
+    
+  # theme(axis.text.x = element_text(angle = 60, hjust = 1), 
+        # legend.position = "top")
+ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png", w =5, h = 5)
 
 ```
-
-
-```{r}
-fosf %>% 
-  # drop_na(p_bray_ppm) %>% 
-  ggplot(aes(rendimiento_qq_ha, balance_p, col = producto_1))+ 
-  geom_point()+
-  labs( x = "Rendimiento (qq/ha)", 
-       y = "Balance fósforo (kg/ha)",
-       col = "Fertilizante")+
-  theme_bw()+
-  geom_hline(yintercept = 0)+
-  coord_fixed(ratio = 1 / 1)
-
-  # guides(col = "none")
-ggsave(last_plot(), file = "plots/balance_fosforo.png")
-```
-
-```{r}
-fosf %>%
-  ggplot(aes(p_bray_ppm, rendimiento_qq_ha, col = producto_1))+
-  geom_point()+
-  geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  theme_bw()+
-  facet_wrap("producto_1", scales =  "free_x")+
-  guides(col = "none")+
-  labs(x = "Dosis  fertilizante (kg/ha)", y = "Rendimiento (qq/ha)")
-
-# ggsave(last_plot(), file = "plots/fosforo_respuesta.png")
-```
-
-
-```{r}
-fosf %>%  
-  mutate(P_bray12 = if_else(p_bray_ppm < 12, "P_bray < 12", "P_bray > 12")) %>% 
-  ggplot(aes(p_bray_ppm, rendimiento_qq_ha, col = fertilizante))+
-  geom_point()+
-  geom_smooth(se = F, 
-              method = 'lm'
-              ) +
-  theme_bw()+
-  facet_wrap("P_bray12", scales =  "free_x")+
-  # guides(col = "none")+
-  labs(x = "Dosis  fertilizante (kg/ha)", y = "Rendimiento (qq/ha)")
-
-ggsave(last_plot(), file = "plots/fosforo_respuesta12.png")
-```
-
-
-
-
-
-```{r}
-library(segmented)
-
-fosf1 <- 
-  fosf %>% 
-    drop_na(p_bray_ppm) %>% 
-  dplyr::filter(
-    dosis_kg_ha<180, 
-         dosis_kg_ha>10, 
-         p_bray_ppm<60, 
-         p_bray_ppm>5, 
-         rendimiento_qq_ha>20,
-         fertilizante == "MAP") %>% 
-  arrange(p_bray_ppm)
-
-fosf1 %>% ggplot(aes(p_bray_ppm, rendimiento_qq_ha))+
-  geom_text(aes(label=p_bray_ppm))
-
-fit <- lm(rendimiento_qq_ha ~ p_bray_ppm, 
-            data =fosf1)
-segfit <- segmented(fit)
-summary(segfit)
-
-plot(fosf1$p_bray_ppm, fosf1$rendimiento_qq_ha)  
-plot(segfit, add=TRUE)
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
 

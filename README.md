@@ -2,16 +2,14 @@ Análisis de campaña
 ================
 
   - [Distribución de superficie](#distribuci-n-de-superficie)
-      - [Soja 1era / soja 2°](#soja-1era---soja-2-)
-      - [Grupos de madurez](#grupos-de-madurez)
-      - [Biotecnologías](#biotecnolog-as)
-  - [Manejo](#manejo)
-      - [Fecha de siembra](#fecha-de-siembra)
-      - [Cultivo antecesor](#cultivo-antecesor)
-      - [Fósforo](#f-sforo)
-  - [Variedades](#variedades)
-      - [Superficie](#superficie)
-      - [Performance](#performance)
+    <!-- * [Soja 1era / soja 2°](#soja-1era---soja-2-) -->
+    <!-- * [Grupos de madurez](#grupos-de-madurez) -->
+    <!-- * [Biotecnologías](#biotecnolog-as) -->
+  - [Manejo](#manejo) <!-- * [Fecha de siembra](#fecha-de-siembra) -->
+    <!-- * [Cultivo antecesor](#cultivo-antecesor) -->
+    <!-- * [Fósforo](#f-sforo) -->
+  - [Variedades](#variedades) <!-- * [Superficie](#superficie) -->
+    <!-- * [Performance](#performance) -->
 
 [Carpeta con
 Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
