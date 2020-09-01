@@ -73,6 +73,11 @@ ventanas\_siembra\_sj2.png ![](plots/ventanas_siembra_sj2.png)
 
 ## Rendimientos por fecha de siembra x zona
 
+sj1\_rinde\_x\_GM\_zona\_campana.png
+![](plots/sj1_rinde_x_GM_zona_campana.png)
+
+## Rendimientos por fecha de siembra x zona
+
 (El suavizado de la tendencia esta hecho con modelo polinomial de grado
 2, o sea que puede ser lineal o cuadratico el ajuste)
 

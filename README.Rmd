@@ -43,8 +43,6 @@ sup_sj.png
 tortas_soja_GM.png
 ![](plots/tortas_soja_GM.png)
 
-
-
 sup_sj1.png
 ![](plots/sup_sj1.png)
 
@@ -99,6 +97,13 @@ ventanas_siembra_sj1_GM_campana.png
 
 ventanas_siembra_sj2.png
 ![](plots/ventanas_siembra_sj2.png)
+
+
+
+## Rendimientos por fecha de siembra x zona
+
+sj1_rinde_x_GM_zona_campana.png
+![](plots/sj1_rinde_x_GM_zona_campana.png)
 
 ## Rendimientos por fecha de siembra x zona
 
