@@ -185,7 +185,8 @@ soja1_80 %>%
   labs(x = "Rendimiento (qq/ha)", y = "Nro. de lotes", 
        title = "Distribución de rindes de soja 1° x campaña / zona", 
        subtitle = 'Linea roja indica 50%')+ theme_bw()
-ggsave(last_plot(), file = "plots/histogramas_rinde_sj1.png", w=6, h=6)
+
+ggsave(last_plot(), file = "plots/histogramas_rinde_sj1.png", w=6, h=5)
 
 dat %>% filter(dano_tot ==0,
          fecha_siembra > '2018-09-15', 
@@ -211,7 +212,7 @@ dat %>% drop_na(rinde) %>%
   labs(x = "Rendimiento (qq/ha)", y = "Nro. de lotes", 
        title = "Distribución de rindes de soja 2° x campaña / zona", 
        subtitle = 'Linea roja indica 50%')+ theme_bw()
-ggsave(last_plot(), file = "plots/histogramas_rinde_sj2.png", w=6, h=6)
+ggsave(last_plot(), file = "plots/histogramas_rinde_sj2.png", w=6, h=5)
 ```
 
 (El suavizado de la tendencia esta hecho con modelo polinomial de grado 2, o sea que puede ser lineal o cuadratico el ajuste)
