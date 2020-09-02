@@ -1,8 +1,9 @@
 ---
 title: "Manejo2"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -58,13 +59,28 @@ ggsave(last_plot(), file = "plots/efecto_antecesor.png")
 ```
 
 ```{r}
+cs_bar %>% 
+  ggplot(aes(rendimiento_antecesor_cs_qq_ha, diferencia_cs_vs_barbecho)) + 
+  geom_point()+
+  geom_smooth(method="lm", se = F)+
+  # geom_vline(x_intercept = 0, linetype = 2)+
+  labs(x = "Rendimiento CS (qq/ha)", y = "Diferencia CS vs Barbecho (qq/ha)")+
+  # facet_grid(.~campana)+ 
+  # ylim(0,60)+xlim(0,60)+
+  coord_fixed(ratio = 1 / 1)+
+  expand_limits(x = 0, y = 0)+
+  theme_bw()%+replace%theme(legend.position = "top")
+
+ggsave(last_plot(), file = "plots/CS_vs_BAR.png")
+```
+
+```{r}
 cs_bar17 <- cs_bar %>% filter(campana == "2017/18") 
 
 tmp.ccc <- epi.ccc(cs_bar17$rendimiento_antecesor_cs_qq_ha,
                    cs_bar17$rendimiento_antecesor_barbecho_qq_ha, 
                    ci = "z-transform", conf.level = 0.95, 
                    rep.measure = FALSE)
-
 
 tmp.lab <- data.frame(lab = paste("CCC: ", 
                                   round(tmp.ccc$rho.c[,1], digits = 2), " (95% CI ", 
@@ -108,8 +124,13 @@ xtabs(~producto_1, data = fosf)
 ```
 
 ```{r}
-fosf %>% ggplot(aes(p_bray_ppm))+geom_histogram()
-fosf %>% ggplot(aes(dosis_kg_ha))+geom_histogram()
+fosf %>% ggplot(aes(p_bray_ppm))+
+   geom_histogram(fill = "steelblue")+
+  # geom_vline(data=mu, aes(xintercept=rinde), linetype="dashed", col = "red")+
+  labs(x = "P Bray (ppm)", y = "Nro. de lotes")+ theme_bw()
+ggsave(last_plot(), file = "plots/PBray_histogram.png")
+
+# fosf %>% ggplot(aes(dosis_kg_ha))+geom_histogram()
 ```
 
 ```{r}
@@ -136,9 +157,7 @@ fosf %>%
   labs(x = "Fertilizante fosfatado", y = "Rendimiento (qq/ha)")
 
 ggsave(last_plot(), file = "plots/fosforo_umbral12.png")
-
 ```
-
 
 ```{r}
 fosf %>% 
@@ -186,10 +205,6 @@ fosf %>%
 ggsave(last_plot(), file = "plots/fosforo_respuesta12.png")
 ```
 
-
-
-
-
 ```{r}
 library(segmented)
 
@@ -219,10 +234,20 @@ plot(segfit, add=TRUE)
 
 
 ```{r}
+dat %>% 
+  filter(dano_tot ==0,
+         fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_2", 
+         !napa %in% c("SIN DATO", "TEMPORARIA")) %>% 
+  mutate(napa = fct_recode(napa, CON = "CON INFLUENCIA", SIN = "SIN INFLUENCIA")) %>% 
+  ggplot(aes(x = napa, y = rinde ))+
+  labs(x = "Influencia de napa", y = "Rinde (qq/ha)")+
+  geom_boxplot()+
+  geom_jitter(width=0.2, alpha=0.3)+
+  theme_bw()+
+  facet_grid( campana ~zona)
+
+ggsave(last_plot(), file = "plots/efecto_napa.png")
 ```
-
-
-```{r}
-```
-
-

@@ -388,7 +388,6 @@ dat %>%
   drop_na(intacta) %>% 
   janitor::tabyl(intacta, zona, campana)  
 
-
 intacta_sum <- 
   dat %>% 
   filter(!regional == "La Carlota") %>% 
@@ -403,7 +402,7 @@ intacta_sum <-
 ```
 
 ```{r}
-sts_sum %>% 
+intacta_sum %>% 
   filter(!tecno_sts== "NO OMG") %>% 
   drop_na(tecno_sts) %>% 
   ggplot(aes(x = factor(year), 

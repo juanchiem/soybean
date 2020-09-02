@@ -5,8 +5,16 @@ output: html_document
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
-# dat <- read_csv(here::here("data/clean_data.csv"))
 load(here::here("data/soy_dat.Rdata"))
+
+theme_aapre <-   theme_bw(base_size = 13) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
+        legend.position = "top", legend.justification = "right",
+        plot.title = element_text(family = 'Helvetica', 
+                                  color = '#666666', 
+                                  face = 'bold', 
+                                  # size = 15, 
+                                  vjust = -7))
 ```
 
 ## Ventanas de siembra por zona / GM
@@ -26,14 +34,14 @@ dat %>%
                       jittered_points = TRUE, scale = .5, rel_min_height = .01,
                       point_shape = "|", point_size = 1, size = 0.25,
                       position = position_points_jitter(height = 0))+
-  scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"), expand = c(0,0))+
+  scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"), 
+               limits = ymd(c('2018-10-1', '2018-31-12')))+
   labs(x= "", y = "Zona", 
        title = "Ventanas de siembra soja 1°/2°" ,
        fill = "")+
-  theme_bw(base_size = 13) + 
-  theme(axis.text.x = element_text(hjust = -0.1))#angle = 60,
+  theme_aapre %+replace% theme(axis.text.x = element_text(hjust = -0.1))#angle = 60,
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_cultivo1_2.png", width = 5, height = 4)
+ggsave(last_plot(), file = "plots/ventanas_siembra_cultivo1_2.png", width = 6, height = 5)
 ```
 
 ### Soja 1° 
@@ -51,12 +59,11 @@ dat %>%
                       position = position_points_jitter(height = 0))+
   scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"), expand = c(0,0))+
   labs(x= "", y = "Zona", 
-       title = "Evolución inter-anual de ventanas de siembra" ,
+       title = "Evolución inter-anual de\nventanas de siembra" ,
        fill = "")+
-  theme_bw(base_size = 13) + 
-  theme(axis.text.x = element_text(hjust = -0.1))#angle = 60,
+   theme_aapre %+replace% theme(axis.text.x = element_text(hjust = -0.1))#angle = 60,
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_campana.png", width = 5, height = 4)
+ggsave(last_plot(), file = "plots/ventanas_siembra_campana.png", width = 6, height = 5)
 ```
 
 
@@ -75,10 +82,8 @@ dat %>%
   facet_wrap("campana")+
   labs(x= "", y = "Zona", fill = "GM", 
        title = "Ventanas de siembra soja 1°" )+
-  theme_bw(base_size = 13) + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
-
-ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM.png", width = 5, height = 4)
+  theme_aapre
+ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM.png", width = 6.5, height = 4)
 ```
 
 ### Soja 2° 
@@ -99,38 +104,134 @@ dat %>%
   facet_wrap("campana")+
   labs(x= "", y = "Zona", fill = "GM", 
        title = "Ventanas de siembra soja 2°" )+  
-  theme_bw(base_size = 13) + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  theme_aapre
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_sj2.png", width = 5.5, height = 4)
+ggsave(last_plot(), file = "plots/ventanas_siembra_sj2.png", width = 6.5, height = 4)
 ```
 
-## Rendimientos por fecha de siembra x zona
+## Rendimientos 
+
+```{r}
+dat %>% filter(dano_tot ==0,
+         fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_1") %>% 
+  select(campana, zona, rinde) %>% 
+  # rename(`Rinde (qq/ha)` = rinde, `Superficie (ha)` = superficie) %>% 
+  # pivot_longer(-campana, -zona) %>% 
+  group_by(campana, zona) %>% 
+  summarise(rinde_top20 = quantile(rinde, 0.8)) -> top20
+
+dat %>% filter(dano_tot ==0,
+         fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_1") %>% 
+  left_join(top20, by = c("campana", "zona")) %>% 
+  mutate(top20 = if_else(rinde >= rinde_top20, "si", "no")) -> soja1_80
+  
+soja1_80 %>% 
+  filter(top20 == "si") %>%
+  drop_na(antecesor) %>% 
+  janitor::tabyl(antecesor, GM, sort = TRUE) %>%
+  janitor::adorn_totals(c("row", "col")) %>%
+  # janitor::adorn_percentages(c("row")) %>% 
+  janitor::adorn_percentages(c("col")) %>%
+  mutate(across(is.numeric, round, 2))
+
+soja1_80 %>% 
+  filter(top20 == "no") %>%
+  drop_na(antecesor) %>% 
+  janitor::tabyl(antecesor, GM, sort = TRUE) %>%
+  janitor::adorn_totals(c("row", "col")) %>%
+  janitor::adorn_percentages(c("col")) %>% 
+  mutate(across(is.numeric, round, 2))
+```
+
+```{r}
+soja1_80 %>% 
+  filter(top20 == "si") %>%
+  drop_na(antecesor) %>% 
+  janitor::tabyl(napa, agua_inicio, sort = TRUE) %>%
+  janitor::adorn_totals(c("row", "col")) %>%
+  # janitor::adorn_percentages(c("row")) %>% 
+  janitor::adorn_percentages(c("col")) %>%
+  mutate(across(is.numeric, round, 2))
+
+soja1_80 %>% 
+  filter(top20 == "no") %>%
+  drop_na(antecesor) %>% 
+  janitor::tabyl(napa, agua_inicio, sort = TRUE) %>%
+  janitor::adorn_totals(c("row", "col")) %>%
+  janitor::adorn_percentages(c("col")) %>% 
+  mutate(across(is.numeric, round, 2))
+
+```
+
+
+```{r}
+soja1_80 %>% 
+  select(campana, zona, rinde) %>% 
+  group_by(campana, zona) %>% 
+  summarise(rinde = round(median(rinde, na.rm = T),0)) -> mu
+
+soja1_80 %>%
+  ggplot(aes(rinde))+
+  geom_histogram(fill = "steelblue")+
+  # geom_histogram(aes(fill = top20))+
+  facet_grid(campana ~zona, scales = "free_y")+
+  geom_vline(data=mu, aes(xintercept=rinde), linetype="dashed", col = "red")+
+  labs(x = "Rendimiento (qq/ha)", y = "Nro. de lotes", 
+       title = "Distribución de rindes de soja 1° x campaña / zona", 
+       subtitle = 'Linea roja indica 50%')+ theme_bw()
+ggsave(last_plot(), file = "plots/histogramas_rinde_sj1.png", w=6, h=6)
+
+dat %>% filter(dano_tot ==0,
+         fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_2") %>% 
+  select(campana, zona, rinde) %>% 
+  # rename(`Rinde (qq/ha)` = rinde, `Superficie (ha)` = superficie) %>% 
+  # pivot_longer(-campana, -zona) %>% 
+  group_by(campana, zona) %>% 
+  summarise(rinde = round(median(rinde, na.rm = T),0)) -> mu2
+
+dat %>% drop_na(rinde) %>% 
+  filter(dano_tot ==0,
+         fecha_siembra > '2018-09-15', 
+         fecha_siembra < '2018-12-29',
+         rinde>4,
+         cultivo == "soja_2") %>%
+  ggplot(aes(rinde))+
+  geom_histogram(fill = "steelblue")+
+  facet_grid(campana ~zona, scales = "free_y")+
+  geom_vline(data=mu2, aes(xintercept=rinde), linetype="dashed", col = "red")+
+  labs(x = "Rendimiento (qq/ha)", y = "Nro. de lotes", 
+       title = "Distribución de rindes de soja 2° x campaña / zona", 
+       subtitle = 'Linea roja indica 50%')+ theme_bw()
+ggsave(last_plot(), file = "plots/histogramas_rinde_sj2.png", w=6, h=6)
+```
 
 (El suavizado de la tendencia esta hecho con modelo polinomial de grado 2, o sea que puede ser lineal o cuadratico el ajuste)
 
 Soja 1°
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-dat %>% drop_na(rinde) %>% 
-  filter(fecha_siembra > '2018-09-15', 
-         fecha_siembra < '2018-12-29',
-         rinde>4,
-         cultivo == "soja_1") %>%
+soja1_80 %>% 
   mutate(zona = fct_rev(zona)) %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
   facet_grid(zona~., scales="free_x")+
   geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
   scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
-  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.position = "top")
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="", 
+       title = "Rendimiento Soja 1°")+
+  theme_aapre
 
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", w=3.5, h=5)
+ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", w=6, h=6)
 ```
-
 
 Zona 1 x GM
 
@@ -152,16 +253,13 @@ dat %>% drop_na(rinde) %>%
   # geom_flquantiles(probs=c(0.90), alpha=0.15)+
   # geom_quantile(aes(col=campana), quantiles = 0.8, linetype = 2)+
   scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
-  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.position = "top")
+  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+ 
+  theme_aapre
+
 
 ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1_zona1_GM.png", w=3.5, h=5)
-
-data(ple4)
-plot(rlnorm(200, fbar(ple4), 0.15))
 ```
+
 
 Zona 2 x GM
 
@@ -211,7 +309,6 @@ ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png", w =5, h = 5)
 
 ```
 
-
 Soja 2°
 
 ```{r}
@@ -240,29 +337,215 @@ ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", w=3, h=5)
 
 ```{r}
 library(lubridate)
+
 dat %>% drop_na(rinde) %>% 
-  filter(fecha_siembra > '2018-09-15', 
-         fecha_siembra < '2018-12-29',
-         rinde>4,
-         cultivo == "soja_1", zona == 5) %>%
-  #   group_by(fecha_siembra=if_else(day(fecha_siembra) >= 30,
-  #                       floor_date(fecha_siembra, "20 days"),
-  #                       floor_date(fecha_siembra, "10 days"))) %>%
-  # summarize(yield_mean = mean(rinde),
-  #           days = n()) %>%
+  filter(fecha_siembra > '2018-10-15', 
+         fecha_siembra < '2018-12-15',
+         rinde>4) %>% 
   mutate(zona = fct_rev(zona)) %>% 
-  ggplot(aes(x=as.POSIXct(fecha_siembra), y=rinde))+
-  geom_boxplot(aes(colour = GM), varwidth = F)+
-  # geom_point(alpha =0.5, size=0.8)+
-  facet_grid( .~ campana, scales="free_x")+
-  # geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  labs(x = "GM", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) +
-  scale_x_datetime(breaks = date_breaks("15 days")) 
-    
-  # theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        # legend.position = "top")
-ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png", w =5, h = 5)
+  mutate(month = month(fecha_siembra),
+         day = day(fecha_siembra), 
+         quincena = case_when(day %in% 1:15 ~ "Q1",
+                              TRUE ~ "Q2"), 
+         mes_q = paste0(month, "-", quincena)) %>% droplevels() -> dat_rinde  
+  filter(!mes_q %in% c("9-Q2")) -> dat_rinde
+
+# dat_rinde %>%
+#   group_by(GM, mes_q) %>%
+#   identify_outliers(rinde)
+
+glimpse(dat_rinde)
+```
+
+```{r}
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 5) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  facet_wrap(~campana)+
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 5") + theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona5_campanas.png", w =6, h = 5)
+
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 5) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 1) +
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 5")+ theme_aapre+
+  lims(y=c(0,60))
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona5.png", w =5, h = 5)
+
+library(lme4)
+mod5 <- lmer(rinde ~ GM * mes_q + (1|campana), 
+            data = dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 5))
+
+car::Anova(mod5)
+
+library(emmeans)
+em5 <- emmeans(mod5, ~ GM | mes_q) 
+pairs(em5)
 
 ```
 
+
+```{r}
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 4) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  facet_wrap(~campana)+
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 4") + theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona4_campanas.png", w =6, h = 5)
+
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 4) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 4")+ theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona4.png", w =5, h = 5)
+
+mod4 <- lmer(rinde ~ GM * mes_q + (1|campana), 
+            data = dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 4))
+
+car::Anova(mod)
+
+em4 <- emmeans(mod4, ~ GM | mes_q) 
+pairs(em4)
+```
+
+Zona 3
+
+```{r}
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 3) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  facet_wrap(~campana)+
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 3") + theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona3_campanas.png", w =6, h = 5)
+
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 3) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 3")+ theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona3.png", w =5, h = 5)
+
+mod3 <- lmer(rinde ~ GM * mes_q + (1|campana), 
+            data = dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 3))
+
+car::Anova(mod3)
+
+em3 <- emmeans(mod4, ~ GM | mes_q) 
+pairs(em3)
+```
+
+Zona 2
+
+```{r}
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 2) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  facet_wrap(~campana)+
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 2") + theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona2_campanas.png", w =6, h = 5)
+
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 2) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 2")+ theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona2.png", w =5, h = 5)
+
+mod2 <- lmer(rinde ~ GM * mes_q + (1|campana), 
+            data = dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 2))
+
+car::Anova(mod2)
+
+em2 <- emmeans(mod2, ~ GM | mes_q) 
+pairs(em2)
+```
+
+
+
+Zona 1
+
+```{r}
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 1) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  facet_wrap(~campana)+
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 1") + theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona1_campanas.png", w =6, h = 5)
+
+dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 1) %>%
+  ggplot(aes(x=mes_q, y=rinde, fill = GM))+
+  geom_boxplot(outlier.size = 0) +
+  # geom_point(pch = 21, position = position_jitterdodge(), size=0.5)+
+  stat_summary(fun = "mean", pch = 21, size =0.5, 
+               position = position_dodge(width = 0.75))+
+  labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
+       title = "Soja de 1° - Zona 1")+ theme_aapre
+
+ggsave(last_plot(), file = "plots/sj1_rinde_x_zona1.png", w =5, h = 5)
+
+mod1 <- lmer(rinde ~ GM * mes_q + (1|campana), 
+            data = dat_rinde %>% 
+  filter(cultivo == "soja_1", zona == 1))
+
+car::Anova(mod1)
+
+em1 <- emmeans(mod1, ~ GM | mes_q) 
+pairs(em1)
+```

@@ -82,7 +82,8 @@ dat <- raw_dat %>%
     tecno_herbicidas = str_to_upper(gsub(',', '\\.', tecno_herbicidas)), 
     tecno_rr = str_to_upper(gsub(',', '\\.', tecno_rr)), 
     tecno_sts = str_to_upper(gsub(',', '\\.', tecno_sts))) %>% 
-  mutate(riego = str_to_upper(gsub(',', '\\.', riego))) # %>% 
+  mutate(riego = str_to_upper(gsub(',', '\\.', riego)))  %>% 
+  mutate(napa = str_to_upper(gsub(',', '\\.', napa))) # %>% 
 
 # mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
 # mutate(id_row = 1:nrow(.))
