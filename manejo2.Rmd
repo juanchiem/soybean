@@ -34,12 +34,13 @@ cs_bar %>%
   geom_smooth(method="lm", se = F)+
   geom_abline(intercept = 0, slope = 1, linetype = 2)+
   labs(x = "Rendimiento CS (qq/ha)", y = "Rendimiento barbecho (qq/ha)", col = "Napa")+
-  facet_grid(.~campana)+ ylim(0,60)+xlim(0,60)+
+  # facet_grid(.~campana)+ 
+  ylim(0,60)+xlim(0,60)+
   coord_fixed(ratio = 1 / 1)+
   expand_limits(x = 0, y = 0)+
   theme_bw()%+replace%theme(legend.position = "top")
 
-ggsave(last_plot(), file = "plots/efecto_antecesor_napa.png")
+ggsave(last_plot(), file = "plots_manejo2/efecto_antecesor_napa_periodo_17_20.png")
 ```
 
 
