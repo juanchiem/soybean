@@ -1,0 +1,86 @@
+---
+title: "adversidades"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+pacman::p_load(tidyverse) 
+# dat <- read_csv(here::here("data/clean_data.csv"))
+load(here::here("data/soy_dat.Rdata"))
+glimpse(dat)
+```
+
+```{r}
+dat %>% 
+  select(campana, zona, cultivo, superficie, starts_with("especie")) %>% 
+  mutate(across(starts_with("especie"), 
+                ~stringi::stri_trans_general(., "Latin-ASCII"))) %>% #sacar acentos
+  mutate(across(starts_with("especie"), 
+                ~str_to_upper(gsub(',', '\\.',.)))) %>%  # UPPER + sacar ","
+  mutate(across(starts_with("especie"), 
+                ~str_replace(., "SP.", ""))) %>%  # sacar SP.
+  mutate(across(starts_with("especie"), 
+                ~str_trim(.))) -> adv_herb   #sacar espacios antes-desp
+```
+
+```{r}
+adv_herb %>%
+  filter_at(vars(starts_with("especie")), any_vars(!is.na(.))) %>%
+  pivot_longer(-(campana:superficie), names_to = "nivel", values_to = "maleza")%>% 
+  filter(!maleza %in% c(NA, "OTRO", "OTRA", "VARIAS", "ROSETA"))%>%   
+  distinct(maleza) %>%
+  arrange(maleza) %>% 
+  pull(maleza) %>%
+  unique() 
+
+malezas_ref <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit#gid=950522321")
+
+herb_long <- adv_herb %>%
+  filter_at(vars(starts_with("especie")), any_vars(!is.na(.))) %>%
+  pivot_longer(-(campana:superficie), names_to = "nivel", values_to = "maleza")%>% 
+  filter(!maleza %in% c(NA, "OTRO", "OTRA", "VARIAS", "ROSETA")) %>% 
+   stringdist_left_join(malezas_ref %>% drop_na(genero), 
+                        by = c(maleza = "genero"), max_dist = 1) %>%
+   stringdist_left_join(malezas_ref %>% drop_na(n_comun), 
+                        by = c(maleza = "n_comun"), max_dist = 1) %>%
+  mutate(maleza = coalesce(n_comun.x,n_comun.y )) %>%
+         select(campana:nivel, maleza)%>%
+  group_by(campana, zona, nivel, maleza)%>%
+  summarise(var_sup = sum(superficie, na.rm = TRUE))%>%  
+  group_by(campana, zona, nivel) %>% 
+  mutate(porcent=var_sup/sum(var_sup)*100, 
+         nivel = recode(nivel, especie_principal = "1° Especie", 
+                        especie_secundaria = "2° Especie", 
+                        especie_terciaria= "3°")) %>% 
+  drop_na(maleza)
+```
+
+```{r}
+plots_herb <- 
+  herb_long %>%
+  filter(!nivel == "3°")%>%
+  group_by(zona) %>%
+  nest() %>%
+  mutate(plot = map2(data, zona, 
+                     ~ggplot(data = .x,  
+         aes(x = factor(campana), 
+             y = porcent, 
+             col = maleza, 
+             group = maleza))+
+             geom_line()+
+  geom_point()+
+  labs(x = NULL, y = "% del área de cada zona",
+        title = paste0("Evolución de principales malezas -  Zona ", .y))+
+  guides(col="none")+
+  facet_wrap(~nivel)+
+  ggrepel::geom_text_repel(
+    data = .x  %>% filter(zona == .y, campana == "2019/20"),
+    aes(label = maleza), size =2, nudge_x = 0.2) +
+  theme_bw(base_size = 9)
+))
+file_names <- paste0("plots_adversidades/", levels(herb_long$zona), "_malezas.png")
+map2(file_names, plots_herb$plot, ggsave)
+```
+

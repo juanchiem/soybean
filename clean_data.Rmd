@@ -50,20 +50,25 @@ dat <- raw_dat %>%
          intacta = tecnologia_lepidopteros, 
          GM = grupo_de_madurez, semillero, 
          espaciamiento_cm, densidad, 
-         riego, napa, agua_inicio=estado_del_perfil_a_la_siembra,  
+         especie_principal, especie_secundaria, especie_terciaria, 
+         riego, napa, 
+         agua_inicio=estado_del_perfil_a_la_siembra,  
          adversidad_1, 
          dano_1 = percent_estimados_de_dano, adversidad_2, 
-         dano_2 = percent_estimados_de_dano1) %>% 
+         dano_2 = percent_estimados_de_dano1, 
+         fungicida) %>%  
   # filter(rinde > 10) %>%
-  mutate(zona = as.factor(replace_na(zona, '3')), 
-         fecha_siembra = lubridate::ymd(fecha_siembra), 
-         GM = str_squish(str_to_upper(gsub(',', '\\.', GM))), 
-         dano_1 = as.numeric(replace_na(dano_1, '0')), 
-         dano_2 = as.numeric(replace_na(dano_2, '0')),
-         dano_tot = dano_1 + dano_2,
-         cultivo = recode(cultivo,  # cambios manuales
-                          'Soja 1°'= 'soja_1',
-                          'Soja 2°'= 'soja_2')) %>% 
+  mutate(
+    campana = as.factor(campana),
+    zona = as.factor(replace_na(zona, '3')), 
+    fecha_siembra = lubridate::ymd(fecha_siembra), 
+    GM = str_squish(str_to_upper(gsub(',', '\\.', GM))), 
+    dano_1 = as.numeric(replace_na(dano_1, '0')), 
+    dano_2 = as.numeric(replace_na(dano_2, '0')),
+    dano_tot = dano_1 + dano_2,
+    cultivo = as.factor(recode(cultivo,  # cambios manuales
+                               'Soja 1°'= 'soja_1',
+                               'Soja 2°'= 'soja_2'))) %>% 
   mutate(regional = str_trim(string = regional),
          regional = str_to_title(regional), # capital letters
          regional = stringi::stri_trans_general(regional,"Latin-ASCII"), # sacar acentos
@@ -82,8 +87,9 @@ dat <- raw_dat %>%
     tecno_herbicidas = str_to_upper(gsub(',', '\\.', tecno_herbicidas)), 
     tecno_rr = str_to_upper(gsub(',', '\\.', tecno_rr)), 
     tecno_sts = str_to_upper(gsub(',', '\\.', tecno_sts))) %>% 
-  mutate(riego = str_to_upper(gsub(',', '\\.', riego)))  %>% 
-  mutate(napa = str_to_upper(gsub(',', '\\.', napa))) # %>% 
+  mutate(riego = str_to_upper(gsub(',', '\\.', riego)))  %>%
+  mutate(napa = str_to_upper(gsub(',', '\\.', napa)),
+         fungicida = case_when(fungicida == "SI" ~ 1, TRUE ~ 0)) 
 
 # mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
 # mutate(id_row = 1:nrow(.))
