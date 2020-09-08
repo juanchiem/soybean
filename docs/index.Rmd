@@ -38,7 +38,7 @@ library(magrittr)
 
 # Distribución de superficie
 
-[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_superficie) 
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_superficies) 
 
 ```{r, out.width = "400px"}
 plots_superficies <- paste0(here::here(), "/plots_superficies/", "*.png")
