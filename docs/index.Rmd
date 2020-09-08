@@ -1,0 +1,88 @@
+---
+output: html_document
+title: Análisis de campaña
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(
+  collapse = F, echo = F, message=FALSE, warning=FALSE,
+  comment = "#>",
+  out.width = "50%")
+library(knitr)
+library(magrittr)
+```
+
+- [Distribución de superficie](#distribuci-n-de-superficie)
+  - Soja 1era / soja 2°
+  - Grupos de madurez 
+  - Biotecnologías semillas
+  - Uso fungicidas
+  - Uso insecticidas
+  
+- [Manejo 1](#manejo-1)
+
+  - Fecha de siembra 
+
+- [Manejo 2](#manejo-2)
+
+  - Cultivo antecesor 
+  - Fósforo
+
+- [Adversidades](#adversidades)
+
+  - Malezas
+  
+- [Cultivares](#cultivares)
+  
+[Link a datos](https://github.com/juanchiem/soybean/tree/master/data) 
+
+# Distribución de superficie
+
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_superficie) 
+
+```{r, out.width = "400px"}
+plots_superficies <- paste0(here::here(), "/plots_superficies/", "*.png")
+Sys.glob(plots_superficies)
+Sys.glob(plots_superficies) %>% include_graphics(.)
+```
+
+# Manejo 1
+
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_manejo1) 
+
+```{r, out.width = "400px"}
+plots_manejo1 <- paste0(here::here(), "/plots_manejo1/", "*.png")
+Sys.glob(plots_manejo1)
+Sys.glob(plots_manejo1) %>% include_graphics(.)
+```
+
+# Manejo 2
+
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_manejo2) 
+
+
+```{r, out.width = "400px"}
+plots_manejo2 <- paste0(here::here(), "/plots_manejo2/", "*.png")
+Sys.glob(plots_manejo2)
+Sys.glob(plots_manejo2) %>% include_graphics(.)
+```
+
+# Adversidades
+
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_adversidades) 
+
+```{r, out.width = "400px"}
+plots_adversidades <- paste0(here::here(), "/plots_adversidades/", "*.png")
+Sys.glob(plots_adversidades)
+Sys.glob(plots_adversidades) %>% include_graphics(.)
+```
+
+# Cultivares
+
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_cultivares) 
+
+```{r, out.width = "400px"}
+plots_cultivares <- paste0(here::here(), "/plots_cultivares/", "*.png")
+Sys.glob(plots_cultivares) 
+Sys.glob(plots_cultivares) %>% include_graphics(.)
+```
