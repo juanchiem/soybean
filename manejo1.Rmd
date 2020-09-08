@@ -4,17 +4,44 @@ output: html_document
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-pacman::p_load(tidyverse) 
+pacman::p_load(tidyverse, lubridate) 
 load(here::here("data/soy_dat.Rdata"))
+source('~/Documents/soybean/themes.R')
+```
 
-theme_aapre <-   theme_bw(base_size = 13) + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.position = "top", legend.justification = "right",
-        plot.title = element_text(family = 'Helvetica', 
-                                  color = '#666666', 
-                                  face = 'bold', 
-                                  # size = 15, 
-                                  vjust = -7))
+# Lote tipico por zona
+
+```{r}
+dat %>% select(zona, superficie, rinde) %>% 
+  rename(`Rinde (qq/ha)` = rinde, `Superficie (ha)` = superficie) %>% 
+  pivot_longer(-zona) %>% 
+  group_by(zona, name) %>% summarise(value = round(median(value, na.rm = T),0)) -> datm
+
+dat %>% 
+  select(zona, superficie, rinde) %>% 
+  rename(`Superficie (ha)` = superficie, `Rinde (qq/ha)` = rinde) %>% 
+  pivot_longer(-zona) %>% 
+  mutate_if(is.character, as.factor) %>% 
+  mutate(name = forcats::fct_rev(name)) -> long 
+
+histo5 <- levels(long$zona) %>% 
+  map(~ subset(long, zona == .) %>% 
+        ggplot(aes(x = value))+
+        geom_histogram(fill = "steelblue")+
+        facet_wrap("name", scales = "free")+
+        geom_rug()+
+        labs(x = "Valores observados", y="Cantidad de casos", 
+             title = paste0("Lote típico de la zona ", .))+
+        theme_aapre+
+        geom_vline(data = subset(datm, zona == .), aes(xintercept = value),col='red',size=1)+
+        geom_text(data = subset(datm, zona == .), aes(x = value, label = value, y = -Inf, vjust = -1), col  = "white", fontface = 2)
+  )
+
+ggsave(histo5[[1]], file = "plots_manejo1/lote_tipico_zona1.png", width = 4, height = 3)
+ggsave(histo5[[2]], file = "plots_manejo1/lote_tipico_zona2.png", width = 4, height = 3)
+ggsave(histo5[[3]], file = "plots_manejo1/lote_tipico_zona3.png", width = 4, height = 3)
+ggsave(histo5[[4]], file = "plots_manejo1/lote_tipico_zona4.png", width = 4, height = 3)
+ggsave(histo5[[5]], file = "plots_manejo1/lote_tipico_zona5.png", width = 4, height = 3)
 ```
 
 ## Ventanas de siembra por zona / GM
@@ -24,6 +51,7 @@ pacman::p_load(scales, ggridges)
 ```
 
 ```{r}
+# densidades
 dat %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31') %>%
@@ -39,14 +67,16 @@ dat %>%
   labs(x= "", y = "Zona", 
        title = "Ventanas de siembra soja 1°/2°" ,
        fill = "")+
-  theme_aapre %+replace% theme(axis.text.x = element_text(hjust = -0.1))#angle = 60,
+  theme_dens
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_cultivo1_2.png", width = 6, height = 5)
+ggsave(last_plot(), file = "plots_manejo1/ventanas_siembra_cultivo1_2.png", width = 6, height = 5)
 ```
 
 ### Soja 1° 
 
 ```{r}
+# densidades
+
 dat %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31', 
@@ -59,15 +89,16 @@ dat %>%
                       position = position_points_jitter(height = 0))+
   scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"), expand = c(0,0))+
   labs(x= "", y = "Zona", 
-       title = "Evolución inter-anual de\nventanas de siembra" ,
+       title = "Evolución inter-anual de\nventanas de siembra - Soja 1°" ,
        fill = "")+
-   theme_aapre %+replace% theme(axis.text.x = element_text(hjust = -0.1))#angle = 60,
+  theme_dens
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_campana.png", width = 6, height = 5)
+ggsave(last_plot(), file = "plots_manejo1/ventanas_siembra_campana.png", width = 6, height = 5)
 ```
 
 
 ```{r}
+#dens
 dat %>% 
   filter(fecha_siembra > '2018-09-15', 
          fecha_siembra < '2018-12-31', 
@@ -82,13 +113,14 @@ dat %>%
   facet_wrap("campana")+
   labs(x= "", y = "Zona", fill = "GM", 
        title = "Ventanas de siembra soja 1°" )+
-  theme_aapre
-ggsave(last_plot(), file = "plots/ventanas_siembra_sj1_GM.png", width = 6.5, height = 4)
+  theme_dens
+ggsave(last_plot(), file = "plots_manejo1/ventanas_siembra_sj1_GM.png", width = 6.5, height = 4)
 ```
 
 ### Soja 2° 
 
 ```{r}
+#dens
 dat %>% 
   filter(fecha_siembra > '2018-11-15', 
          fecha_siembra < '2018-12-31', 
@@ -104,9 +136,9 @@ dat %>%
   facet_wrap("campana")+
   labs(x= "", y = "Zona", fill = "GM", 
        title = "Ventanas de siembra soja 2°" )+  
-  theme_aapre
+  theme_dens
 
-ggsave(last_plot(), file = "plots/ventanas_siembra_sj2.png", width = 6.5, height = 4)
+ggsave(last_plot(), file = "plots_manejo1/ventanas_siembra_sj2.png", width = 6.5, height = 4)
 ```
 
 ## Rendimientos 
@@ -166,7 +198,6 @@ soja1_80 %>%
   janitor::adorn_totals(c("row", "col")) %>%
   janitor::adorn_percentages(c("col")) %>% 
   mutate(across(is.numeric, round, 2))
-
 ```
 
 
@@ -184,9 +215,10 @@ soja1_80 %>%
   geom_vline(data=mu, aes(xintercept=rinde), linetype="dashed", col = "red")+
   labs(x = "Rendimiento (qq/ha)", y = "Nro. de lotes", 
        title = "Distribución de rindes de soja 1° x campaña / zona", 
-       subtitle = 'Linea roja indica 50%')+ theme_bw()
+       subtitle = 'Linea roja indica 50%')+ 
+  theme_aapre
 
-ggsave(last_plot(), file = "plots/histogramas_rinde_sj1.png", w=6, h=5)
+ggsave(last_plot(), file = "plots_manejo1/histogramas_rinde_sj1.png", w=6, h=5)
 
 dat %>% filter(dano_tot ==0,
          fecha_siembra > '2018-09-15', 
@@ -211,8 +243,10 @@ dat %>% drop_na(rinde) %>%
   geom_vline(data=mu2, aes(xintercept=rinde), linetype="dashed", col = "red")+
   labs(x = "Rendimiento (qq/ha)", y = "Nro. de lotes", 
        title = "Distribución de rindes de soja 2° x campaña / zona", 
-       subtitle = 'Linea roja indica 50%')+ theme_bw()
-ggsave(last_plot(), file = "plots/histogramas_rinde_sj2.png", w=6, h=5)
+       subtitle = 'Linea roja indica 50%')+ 
+  theme_aapre
+
+ggsave(last_plot(), file = "plots_manejo1/histogramas_rinde_sj2.png", w=6, h=5)
 ```
 
 (El suavizado de la tendencia esta hecho con modelo polinomial de grado 2, o sea que puede ser lineal o cuadratico el ajuste)
@@ -226,12 +260,13 @@ soja1_80 %>%
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
   facet_grid(zona~., scales="free_x")+
   geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
+  # scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
+  scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"), expand = c(0,0))+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="", 
        title = "Rendimiento Soja 1°")+
-  theme_aapre
+  theme_dens
 
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1.png", w=6, h=6)
+ggsave(last_plot(), file = "plots_manejo1/rinde_Fsiembra_sj1.png", w=6, h=6)
 ```
 
 Zona 1 x GM
@@ -243,24 +278,18 @@ dat %>% drop_na(rinde) %>%
          rinde>4,
          cultivo == "soja_1", 
          zona==1) %>%
+  filter(!(GM== "IV" & rinde <10 & campana == "2018/19")) %>% 
   mutate(zona = fct_rev(zona)) %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
-  facet_grid(.~GM, scales="free_x")+
-  # geom_smooth(aes(col=campana), se = F, span=1) +
-  # geom_smooth(aes(col=campana), method = "lm", formula = y ~ splines::bs(x, 1), se = T) +
-  # geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  geom_quantile(aes(col=campana))+
-  # geom_flquantiles(probs=c(0.90), alpha=0.15)+
-  # geom_quantile(aes(col=campana), quantiles = 0.8, linetype = 2)+
-  scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
+  facet_grid(.~GM)+
+  geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
+  scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"), expand = c(0,0))+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+ 
-  theme_aapre
+  theme_dens
 
-
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1_zona1_GM.png", w=3.5, h=5)
+ggsave(last_plot(), file = "plots_manejo1/rinde_Fsiembra_sj1_zona1_GM.png", w=3.5, h=5)
 ```
-
 
 Zona 2 x GM
 
@@ -274,21 +303,16 @@ dat %>% drop_na(rinde) %>%
   mutate(zona = fct_rev(zona)) %>% 
   ggplot(aes(x=fecha_siembra, y=rinde))+
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
-  facet_grid(.~GM, scales="free_x")+
-  # geom_smooth(aes(col=campana), se = F, span=1) +
+  facet_grid(.~GM)+
   geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  # geom_quantile(aes(col=campana), quantiles = 0.5)+
-  # geom_quantile(aes(col=campana), quantiles = 0.90, linetype = 2)+
-  scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
   labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.position = "top")
+  scale_x_date(date_labels = "%^b", breaks = date_breaks("1 months"))+
+  theme_dens
 
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj1_zona2_GM.png", w=3.5, h=5)
+ggsave(last_plot(), file = "plots_manejo1/rinde_Fsiembra_sj1_zona2_GM.png", w=3.5, h=5)
 ```
 
-
+sj1_rinde_x_GM_zona_campana.png
 
 ```{r}
 dat %>% drop_na(rinde) %>% 
@@ -302,12 +326,11 @@ dat %>% drop_na(rinde) %>%
   geom_point(alpha =0.5, size=0.8)+
   facet_grid(zona ~ campana, scales="free_x")+
   geom_smooth(se = F, method = 'lm', formula = y ~ poly(x, 2)) +
-  labs(x = "GM", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) 
-  # theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        # legend.position = "top")
-ggsave(last_plot(), file = "plots/sj1_rinde_x_GM_zona_campana.png", w =5, h = 5)
+  labs(x = "GM", y = "qq/ha", col ="", 
+       title = "Rendimiento Soja 1°" )+
+  theme_aapre
 
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_GM_zona_campana.png", w =5, h = 5)
 ```
 
 Soja 2°
@@ -326,30 +349,27 @@ dat %>%
   geom_point(aes(col=campana), alpha =0.5, size=0.8)+
   facet_grid(zona~., scales="free_x")+
   geom_smooth(aes(col=campana), se = F, method = 'lm', formula = y ~ poly(x, 1)) +
-  scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
-  labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="")+
-  theme_bw(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.position = "top")
+    labs(x = "Fecha de siembra", y = "Rendimiento (qq/ha)", col ="", 
+       title = "Rendimiento Soja 2°")+
+scale_x_date(date_breaks = "15 day", date_labels =  "%d %b")+
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/rinde_Fsiembra_sj2.png", w=3, h=5)
+ggsave(last_plot(), file = "plots_manejo1/rinde_Fsiembra_sj2.png", w=3, h=5)
 ```
 
 
 ```{r}
-library(lubridate)
-
 dat %>% drop_na(rinde) %>% 
   filter(fecha_siembra > '2018-10-15', 
          fecha_siembra < '2018-12-15',
          rinde>4) %>% 
   mutate(zona = fct_rev(zona)) %>% 
-  mutate(month = month(fecha_siembra),
+  mutate(month = month(fecha_siembra, label = TRUE),
          day = day(fecha_siembra), 
          quincena = case_when(day %in% 1:15 ~ "Q1",
                               TRUE ~ "Q2"), 
          mes_q = paste0(month, "-", quincena)) %>% droplevels() -> dat_rinde  
-  filter(!mes_q %in% c("9-Q2")) -> dat_rinde
+  # filter(!mes_q %in% c("9-Q2")) -> dat_rinde
 
 # dat_rinde %>%
 #   group_by(GM, mes_q) %>%
@@ -368,9 +388,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 5") + theme_aapre
+       title = "Soja de 1° - Zona 5") + 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona5_campanas.png", w =6, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona5_campanas.png", w=6, h=5)
 
 dat_rinde %>% 
   filter(cultivo == "soja_1", zona == 5) %>%
@@ -380,10 +401,11 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 5")+ theme_aapre+
-  lims(y=c(0,60))
+       title = "Soja de 1° - Zona 5\nPeríodo 2017-20")+ 
+  lims(y=c(0,60))+
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona5.png", w =5, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona5.png", w =5, h = 5)
 
 library(lme4)
 mod5 <- lmer(rinde ~ GM * mes_q + (1|campana), 
@@ -409,9 +431,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 4") + theme_aapre
+       title = "Soja de 1° - Zona 4") + 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona4_campanas.png", w =6, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona4_campanas.png", w =6, h = 5)
 
 dat_rinde %>% 
   filter(cultivo == "soja_1", zona == 4) %>%
@@ -421,9 +444,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 4")+ theme_aapre
+       title = "Soja de 1° - Zona 4\nPeríodo 2017-20")+ 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona4.png", w =5, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona4.png", w =5, h = 5)
 
 mod4 <- lmer(rinde ~ GM * mes_q + (1|campana), 
             data = dat_rinde %>% 
@@ -447,9 +471,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 3") + theme_aapre
+       title = "Soja de 1° - Zona 3") + 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona3_campanas.png", w =6, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona3_campanas.png", w =6, h = 5)
 
 dat_rinde %>% 
   filter(cultivo == "soja_1", zona == 3) %>%
@@ -459,9 +484,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 3")+ theme_aapre
+       title = "Soja de 1° - Zona 3\nPeríodo 2017-20")+ 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona3.png", w =5, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona3.png", w =5, h = 5)
 
 mod3 <- lmer(rinde ~ GM * mes_q + (1|campana), 
             data = dat_rinde %>% 
@@ -485,9 +511,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 2") + theme_aapre
+       title = "Soja de 1° - Zona 2") + 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona2_campanas.png", w =6, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona2_campanas.png", w =6, h = 5)
 
 dat_rinde %>% 
   filter(cultivo == "soja_1", zona == 2) %>%
@@ -497,9 +524,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 2")+ theme_aapre
+       title = "Soja de 1° - Zona 2\nPeríodo 2017-20")+ 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona2.png", w =5, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona2.png", w =5, h = 5)
 
 mod2 <- lmer(rinde ~ GM * mes_q + (1|campana), 
             data = dat_rinde %>% 
@@ -510,8 +538,6 @@ car::Anova(mod2)
 em2 <- emmeans(mod2, ~ GM | mes_q) 
 pairs(em2)
 ```
-
-
 
 Zona 1
 
@@ -525,9 +551,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 1") + theme_aapre
+       title = "Soja de 1° - Zona 1") + 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona1_campanas.png", w =6, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona1_campanas.png", w =6, h = 5)
 
 dat_rinde %>% 
   filter(cultivo == "soja_1", zona == 1) %>%
@@ -537,9 +564,10 @@ dat_rinde %>%
   stat_summary(fun = "mean", pch = 21, size =0.5, 
                position = position_dodge(width = 0.75))+
   labs(x = "Mes - Quincena", y = "Rendimiento (qq/ha)", 
-       title = "Soja de 1° - Zona 1")+ theme_aapre
+       title = "Soja de 1° - Zona 1\nPeríodo 2017-20")+ 
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/sj1_rinde_x_zona1.png", w =5, h = 5)
+ggsave(last_plot(), file = "plots_manejo1/sj1_rinde_x_zona1.png", w =5, h = 5)
 
 mod1 <- lmer(rinde ~ GM * mes_q + (1|campana), 
             data = dat_rinde %>% 

@@ -6,8 +6,8 @@ editor_options:
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
+source('~/Documents/soybean/themes.R')
 pacman::p_load(tidyverse) 
-# dat <- read_csv(here::here("data/clean_data.csv"))
 load(here::here("data/soy_dat.Rdata"))
 glimpse(dat)
 ```
@@ -36,8 +36,8 @@ histo5 <- levels(long$zona) %>%
         labs(x = "Valores observados", y="Cantidad de casos", 
              title = paste0("Lote típico de la zona ", .))+
         theme_bw(base_size = 12)+
-        cowplot:: background_grid(minor = c("none", "xy", "x", "y"),
-                                  color.major = "grey95")+
+        # cowplot:: background_grid(minor = c("none", "xy", "x", "y"),
+        #                           color.major = "grey95")+
         geom_vline(data = subset(datm, zona == .), aes(xintercept = value),col='red',size=1)+
         geom_text(data = subset(datm, zona == .), aes(x = value, label = value, y = -Inf, vjust = -1), col  = "white", fontface = 2)
   )

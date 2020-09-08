@@ -7,9 +7,9 @@ title: Análisis de campaña
 knitr::opts_chunk$set(
   collapse = F, echo = F, message=FALSE, warning=FALSE,
   comment = "#>",
-  out.width = "50%")
+  out.width = "60%")
 library(knitr)
-library(magrittr)
+library(tidyverse)
 ```
 
 - [Distribución de superficie](#distribuci-n-de-superficie)
@@ -22,10 +22,12 @@ library(magrittr)
 - [Manejo 1](#manejo-1)
 
   - Fecha de siembra 
+  - Rendimiento
 
 - [Manejo 2](#manejo-2)
 
   - Cultivo antecesor 
+  - Napa
   - Fósforo
 
 - [Adversidades](#adversidades)
@@ -40,10 +42,10 @@ library(magrittr)
 
 [Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_superficies) 
 
-```{r, out.width = "400px"}
+```{r, out.width = "500px"}
 plots_superficies <- paste0(here::here(), "/plots_superficies/", "*.png")
 Sys.glob(plots_superficies)
-Sys.glob(plots_superficies) %>% include_graphics(.)
+Sys.glob(plots_superficies) %>% knitr::include_graphics(.)
 ```
 
 # Manejo 1
