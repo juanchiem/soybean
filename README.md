@@ -2,118 +2,126 @@ Análisis de campaña
 ================
 
   - [Distribución de superficie](#distribuci-n-de-superficie)
-    <!-- * [Soja 1era / soja 2°](#soja-1era---soja-2-) -->
-    <!-- * [Grupos de madurez](#grupos-de-madurez) -->
-    <!-- * [Biotecnologías](#biotecnolog-as) -->
-  - [Manejo](#manejo) <!-- * [Fecha de siembra](#fecha-de-siembra) -->
-    <!-- * [Cultivo antecesor](#cultivo-antecesor) -->
-    <!-- * [Fósforo](#f-sforo) -->
-  - [Variedades](#variedades) <!-- * [Superficie](#superficie) -->
-    <!-- * [Performance](#performance) -->
+    
+      - Soja 1era / soja 2°
+      - Grupos de madurez
+      - Biotecnologías semillas
+      - Uso fungicidas
+      - Uso insecticidas
 
-[Carpeta con
-Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
+  - [Manejo 1](#manejo-1)
+    
+      - Fecha de siembra
+
+  - [Manejo 2](#manejo-2)
+    
+      - Cultivo antecesor
+      - Fósforo
+
+  - [Adversidades](#adversidades)
+    
+      - Malezas
+
+  - [Cultivares](#cultivares)
 
 [Link a datos](https://github.com/juanchiem/soybean/tree/master/data)
 
 # Distribución de superficie
 
-sup\_campana\_zona.png ![](plots/sup_campana_zona.png)
+[Link
+carpeta](https://github.com/juanchiem/soybean/tree/master/plots_superficie)
 
-## Soja 1era / soja 2°
+    #>  [1] "/home/juan/Documents/soybean/plots_superficies/evolucion_RR.png"    
+    #>  [2] "/home/juan/Documents/soybean/plots_superficies/evolucion_STS.png"   
+    #>  [3] "/home/juan/Documents/soybean/plots_superficies/sup_campana_zona.png"
+    #>  [4] "/home/juan/Documents/soybean/plots_superficies/sup_GM_sj1.png"      
+    #>  [5] "/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM3.png"     
+    #>  [6] "/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM4.png"     
+    #>  [7] "/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM5.png"     
+    #>  [8] "/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM6.png"     
+    #>  [9] "/home/juan/Documents/soybean/plots_superficies/sup_sj1.png"         
+    #> [10] "/home/juan/Documents/soybean/plots_superficies/sup_sj2.png"         
+    #> [11] "/home/juan/Documents/soybean/plots_superficies/sup_sj.png"          
+    #> [12] "/home/juan/Documents/soybean/plots_superficies/tortas_soja_GM.png"  
+    #> [13] "/home/juan/Documents/soybean/plots_superficies/uso_fungicidas.png"  
+    #> [14] "/home/juan/Documents/soybean/plots_superficies/uso_insecticidas.png"
 
-sup\_sj.png ![](plots/sup_sj.png)
+<img src="/home/juan/Documents/soybean/plots_superficies/evolucion_RR.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/evolucion_STS.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_campana_zona.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_GM_sj1.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM3.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM4.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM5.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj1_GM6.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj1.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj2.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/sup_sj.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/tortas_soja_GM.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/uso_fungicidas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_superficies/uso_insecticidas.png" width="400px" />
 
-## Grupos de madurez
+# Manejo 1
 
-tortas\_soja\_GM.png ![](plots/tortas_soja_GM.png)
+[Link
+carpeta](https://github.com/juanchiem/soybean/tree/master/plots_manejo1)
 
-sup\_sj1.png ![](plots/sup_sj1.png)
+    #>  [1] "/home/juan/Documents/soybean/plots_manejo1/histogramas_rinde_sj1.png"          
+    #>  [2] "/home/juan/Documents/soybean/plots_manejo1/histogramas_rinde_sj2.png"          
+    #>  [3] "/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona1.png"              
+    #>  [4] "/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona2.png"              
+    #>  [5] "/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona3.png"              
+    #>  [6] "/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona4.png"              
+    #>  [7] "/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona5.png"              
+    #>  [8] "/home/juan/Documents/soybean/plots_manejo1/potencial_ambiente.png"             
+    #>  [9] "/home/juan/Documents/soybean/plots_manejo1/rinde_Fsiembra_sj1.png"             
+    #> [10] "/home/juan/Documents/soybean/plots_manejo1/rinde_Fsiembra_sj1_zona1_GM.png"    
+    #> [11] "/home/juan/Documents/soybean/plots_manejo1/rinde_Fsiembra_sj2.png"             
+    #> [12] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_GM_zona_campana.png"    
+    #> [13] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona1_campanas.png"     
+    #> [14] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona1.png"              
+    #> [15] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona2_campanas.png"     
+    #> [16] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona2.png"              
+    #> [17] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona3_campanas.png"     
+    #> [18] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona3.png"              
+    #> [19] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona4_campanas.png"     
+    #> [20] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona4.png"              
+    #> [21] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona5_campanas.png"     
+    #> [22] "/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona5.png"              
+    #> [23] "/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_campana.png"       
+    #> [24] "/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_cultivo1_2.png"    
+    #> [25] "/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra.png"               
+    #> [26] "/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_sj1_GM_campana.png"
+    #> [27] "/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_sj1_GM.png"        
+    #> [28] "/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_sj2.png"
 
-sup\_sj1\_GM3.png ![](plots/sup_sj1_GM3.png)
+<img src="/home/juan/Documents/soybean/plots_manejo1/histogramas_rinde_sj1.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/histogramas_rinde_sj2.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona1.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona2.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona3.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona4.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/lote_tipico_zona5.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/potencial_ambiente.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/rinde_Fsiembra_sj1.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/rinde_Fsiembra_sj1_zona1_GM.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/rinde_Fsiembra_sj2.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_GM_zona_campana.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona1_campanas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona1.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona2_campanas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona2.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona3_campanas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona3.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona4_campanas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona4.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona5_campanas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/sj1_rinde_x_zona5.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_campana.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_cultivo1_2.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_sj1_GM_campana.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_sj1_GM.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo1/ventanas_siembra_sj2.png" width="400px" />
 
-sup\_sj1\_GM4.png ![](plots/sup_sj1_GM4.png)
+# Manejo 2
 
-sup\_sj1\_GM5.png ![](plots/sup_sj1_GM5.png)
+[Link
+carpeta](https://github.com/juanchiem/soybean/tree/master/plots_manejo2)
 
-sup\_sj1\_GM6.png ![](plots/sup_sj1_GM6.png)
+    #>  [1] "/home/juan/Documents/soybean/plots_manejo2/balance_fosforo.png"                    
+    #>  [2] "/home/juan/Documents/soybean/plots_manejo2/CS_vs_BAR.png"                          
+    #>  [3] "/home/juan/Documents/soybean/plots_manejo2/efecto_antecesor_napa_periodo_17_20.png"
+    #>  [4] "/home/juan/Documents/soybean/plots_manejo2/efecto_antecesor_napa.png"              
+    #>  [5] "/home/juan/Documents/soybean/plots_manejo2/efecto_antecesor.png"                   
+    #>  [6] "/home/juan/Documents/soybean/plots_manejo2/efecto_napa.png"                        
+    #>  [7] "/home/juan/Documents/soybean/plots_manejo2/evolucion_CS.png"                       
+    #>  [8] "/home/juan/Documents/soybean/plots_manejo2/fosforo_dosis.png"                      
+    #>  [9] "/home/juan/Documents/soybean/plots_manejo2/fosforo_productos.png"                  
+    #> [10] "/home/juan/Documents/soybean/plots_manejo2/fosforo_respuesta12.png"                
+    #> [11] "/home/juan/Documents/soybean/plots_manejo2/fosforo_respuesta18.png"                
+    #> [12] "/home/juan/Documents/soybean/plots_manejo2/fosforo_respuesta.png"                  
+    #> [13] "/home/juan/Documents/soybean/plots_manejo2/fosforo_umbral12.png"                   
+    #> [14] "/home/juan/Documents/soybean/plots_manejo2/PBray_histogram.png"
 
-sup\_sj2.png ![](plots/sup_sj2.png)
+<img src="/home/juan/Documents/soybean/plots_manejo2/balance_fosforo.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/CS_vs_BAR.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/efecto_antecesor_napa_periodo_17_20.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/efecto_antecesor_napa.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/efecto_antecesor.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/efecto_napa.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/evolucion_CS.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/fosforo_dosis.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/fosforo_productos.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/fosforo_respuesta12.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/fosforo_respuesta18.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/fosforo_respuesta.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/fosforo_umbral12.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_manejo2/PBray_histogram.png" width="400px" />
 
-## Biotecnologías
+# Adversidades
 
-evolucion\_RR.png ![](plots/evolucion_RR.png)
+[Link
+carpeta](https://github.com/juanchiem/soybean/tree/master/plots_adversidades)
 
-evolucion\_STS.png ![](plots/evolucion_STS.png)
+    #> [1] "/home/juan/Documents/soybean/plots_adversidades/1_malezas.png"
+    #> [2] "/home/juan/Documents/soybean/plots_adversidades/2_malezas.png"
+    #> [3] "/home/juan/Documents/soybean/plots_adversidades/3_malezas.png"
+    #> [4] "/home/juan/Documents/soybean/plots_adversidades/4_malezas.png"
+    #> [5] "/home/juan/Documents/soybean/plots_adversidades/5_malezas.png"
 
-# Manejo
+<img src="/home/juan/Documents/soybean/plots_adversidades/1_malezas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_adversidades/2_malezas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_adversidades/3_malezas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_adversidades/4_malezas.png" width="400px" /><img src="/home/juan/Documents/soybean/plots_adversidades/5_malezas.png" width="400px" />
 
-## Lote medio de cada zona (2017-2020)
+# Cultivares
 
-<img src="plots/lote_tipico_zona1.png" width="50%" /><img src="plots/lote_tipico_zona2.png" width="50%" /><img src="plots/lote_tipico_zona3.png" width="50%" /><img src="plots/lote_tipico_zona4.png" width="50%" /><img src="plots/lote_tipico_zona5.png" width="50%" />
+[Link
+carpeta](https://github.com/juanchiem/soybean/tree/master/plots_cultivares)
 
-    #> [1] "lotes_tipicos"
-
-## Fecha de siembra
-
-ventanas\_siembra\_campana.png ![](plots/ventanas_siembra_campana.png)
-
-### Soja 1°
-
-ventanas\_siembra\_sj1\_GM.png ![](plots/ventanas_siembra_sj1_GM.png)
-
-ventanas\_siembra\_sj1\_GM\_campana.png
-![](plots/ventanas_siembra_sj1_GM_campana.png)
-
-### Soja 2°
-
-ventanas\_siembra\_sj2.png ![](plots/ventanas_siembra_sj2.png)
-
-## Rendimientos por fecha de siembra x zona
-
-sj1\_rinde\_x\_GM\_zona\_campana.png
-![](plots/sj1_rinde_x_GM_zona_campana.png)
-
-## Rendimientos por fecha de siembra x zona
-
-(El suavizado de la tendencia esta hecho con modelo polinomial de grado
-2, o sea que puede ser lineal o cuadratico el ajuste)
-
-### Soja 1°
-
-rinde\_Fsiembra\_sj1.png ![](plots/rinde_Fsiembra_sj1.png)
-
-### Soja 2°
-
-rinde\_Fsiembra\_sj2.png ![](plots/rinde_Fsiembra_sj2.png)
-
-## Cultivo antecesor
-
-### Con efecto napa
-
-efecto\_antecesor\_napa.png ![](plots/efecto_antecesor_napa.png)
-
-### Sin efecto napa
-
-efecto\_antecesor.png ![](plots/efecto_antecesor.png)
-
-## Fósforo
-
-fosforo\_respuesta.png ![](plots/fosforo_respuesta.png)
-
-fosforo\_dosis.png ![](plots/fosforo_dosis.png)
-
-balance\_fosforo.png ![](plots/balance_fosforo.png)
-
-fosforo\_respuesta12.png ![](plots/fosforo_respuesta12.png)
-
-fosforo\_respuesta18.png ![](plots/fosforo_respuesta18.png)
-
-# Variedades
-
-## Potencial ambiente
-
-potencial\_ambiente.png ![](plots/potencial_ambiente.png)
-
-[Soja 1° - rinde de variedades mas sembradas por
-zona](https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit#gid=285024912)
+    #> character(0)

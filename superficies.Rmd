@@ -42,11 +42,12 @@ histo5 <- levels(long$zona) %>%
         geom_text(data = subset(datm, zona == .), aes(x = value, label = value, y = -Inf, vjust = -1), col  = "white", fontface = 2)
   )
 
-ggsave(histo5[[1]], file = "plots_superficies/lote_tipico_zona1.png", width = 4, height = 3)
-ggsave(histo5[[2]], file = "plots_superficies/lote_tipico_zona2.png", width = 4, height = 3)
-ggsave(histo5[[3]], file = "plots_superficies/lote_tipico_zona3.png", width = 4, height = 3)
-ggsave(histo5[[4]], file = "plots_superficies/lote_tipico_zona4.png", width = 4, height = 3)
-ggsave(histo5[[5]], file = "plots_superficies/lote_tipico_zona5.png", width = 4, height = 3)
+ggsave(histo5[[1]], file = "plots/lote_tipico_zona1.png", width = 4, height = 3)
+ggsave(histo5[[2]], file = "plots/lote_tipico_zona2.png", width = 4, height = 3)
+ggsave(histo5[[3]], file = "plots/lote_tipico_zona3.png", width = 4, height = 3)
+ggsave(histo5[[4]], file = "plots/lote_tipico_zona4.png", width = 4, height = 3)
+ggsave(histo5[[5]], file = "plots/lote_tipico_zona5.png", width = 4, height = 3)
+
 ```
 
 
@@ -83,11 +84,463 @@ dat %>%
    theme_bw(base_size = 12) %+replace% 
   theme(plot.title = element_text(hjust = 1.5, vjust = 1))
 
-ggsave(last_plot(), file = "plots_superficies/sup_campana_zona.png", width = 7, height = 4)
+ggsave(last_plot(), file = "plots/sup_campana_zona.png", width = 7, height = 4)
 
 ```
 
 ```{r, eval=FALSE}
 #Cantidad de datos/celdas vacias por variable
 dat %>%
-  summarise_all(funs( = <- <- 
+  summarise_all(funs(sum(!is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "datos") %>% 
+  left_join(by="variable", 
+            dat %>%
+    summarise_all(funs(sum(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "datos_faltantes") 
+  ) %>% 
+  knitr::kable()
+```
+
+## Distribución de variedades: superficie (tamaño de cuadrados) y rendimientos (intensidad de color) por GM 
+
+```{r}
+library(treemap)
+
+dat_sum <- dat %>% 
+  group_by(campana, cultivo, GM, variedad) %>%
+  summarise(var_lotes= n(), 
+            var_sup = sum(superficie, na.rm = TRUE),
+            rinde_medio = median(rinde, na.rm = TRUE), .groups = 'drop') %>% 
+mutate_if(is.character, as.factor)
+# dat_sum
+```
+
+Sup por zona / tipo de soja
+
+```{r}
+png(filename="plots/sup_sj.png", 
+    width = 150, height = 75, units='mm', res = 300)
+
+dat %>% 
+  drop_na(cultivo) %>% 
+  group_by(zona, cultivo) %>%
+  summarise(lotes= n(), 
+            sup = sum(superficie, na.rm = TRUE),
+            rinde_medio = median(rinde, na.rm = TRUE), .groups = 'drop') %>% 
+mutate_if(is.character, as.factor)%>%
+  mutate(cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) %>% 
+  treemap(index=c("zona", "cultivo"),
+          vSize="sup",
+          vColor="rinde_medio",
+          type = "value",
+          title = "Superficie de soja 1° y 2° por zona",
+          title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center"))) 
+dev.off()
+```
+
+Distrib. soja de 1era
+
+```{r}
+png(filename="plots/sup_sj1.png", 
+    width = 150, height = 75, units='mm', res = 300)
+
+subset(dat_sum, 
+       cultivo == "soja_1" ) %>% 
+  treemap(index=c("GM", "variedad"),
+          vSize="var_sup",
+          vColor="rinde_medio",
+          type = "value",
+          title = "Soja 1° - Superficie de variedades por grupo de madurez",
+          title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center"))) 
+dev.off()
+```
+
+```{r}
+png(filename="plots/sup_sj1_GM3.png", 
+    width = 150, height = 75, units='mm', res = 300)
+
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "III") %>% 
+  treemap(index=c("campana", "variedad"),
+          vSize="var_sup",
+          vColor="rinde_medio",
+          type = "value",
+          title = "Soja 1° - GM III",
+          title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
+dev.off()
+```
+
+```{r}
+png(filename="plots/sup_sj1_GM4.png", 
+    width = 150, height = 75, units='mm', res = 300)
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "IV") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM IV",
+                title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
+dev.off()
+```
+
+```{r}
+png(filename="plots/sup_sj1_GM5.png", 
+    width = 150, height = 75, units='mm', res = 300)
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "V") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM V",
+                title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          bg.labels=c("transparent"),              # Background color of labels
+          inflate.labels=F,
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
+dev.off()
+```
+
+
+```{r}
+png(filename="plots/sup_sj1_GM6.png", 
+    width = 150, height = 75, units='mm', res = 300)
+subset(dat_sum, 
+       cultivo == "soja_1" & GM == "VI") %>% 
+        treemap(index=c("campana", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 1° - GM VI",
+                title.legend = "Rendimiento medio (qq/ha)",
+          overlap.labels=1, 
+          inflate.labels=F,
+                    bg.labels=c("transparent"),              # Background color of labels
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
+dev.off()
+```
+
+### Soja 2°
+
+```{r}
+png(filename="plots/sup_sj2.png", 
+    width = 150, height = 75, units='mm', res = 300)
+
+subset(dat_sum, cultivo == "soja_2") %>% 
+        treemap(index=c("GM", "variedad"),
+                vSize="var_sup",
+                vColor="rinde_medio",
+                type = "value",
+                title = "Soja 2° - Superficie de variedades por grupo de madurez",
+                title.legend = "Rendimiento medio (qq/ha)",
+                          overlap.labels=1, 
+          inflate.labels=F,
+          bg.labels=c("transparent"),              # Background color of labels
+           align.labels=list(
+        c("left", "top"),
+        c("center", "center")))
+dev.off()
+```
+
+
+- Area de siembra de GM por zona y tipo de cultivo de soja
+
+```{r}
+dat_sum2 <- dat %>% 
+  group_by(zona, cultivo, GM) %>%
+  summarise(#var_lotes= n(), 
+    var_sup = sum(superficie, na.rm = TRUE),
+    rinde_medio = median(rinde, na.rm = TRUE), 
+    .groups = 'drop') %>% 
+  mutate_if(is.character, as.factor) %>% 
+  drop_na() %>% 
+  group_by(zona, cultivo) %>% 
+  mutate(porcent=var_sup/sum(var_sup)*100, 
+         cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) 
+
+dat_sum2 %>% #data.frame
+  ggplot(aes(x =factor(1), y = porcent, fill = GM)) +
+  geom_bar(stat='identity') +
+  coord_polar(theta = "y")+
+  facet_grid(cultivo ~ zona, switch = "y")+
+  theme_void()+
+  geom_text(aes( label=paste0(round(porcent), "\n",GM)), 
+            position=position_stack(vjust=0.5), color="white",size=3, fontface ="bold")+
+  theme(legend.position="bottom")+
+  scale_fill_viridis_d(direction = -1)
+
+ggsave(last_plot(), file = "plots/tortas_soja_GM.png", width = 7, height = 4)
+```
+
+
+- Evolución de uso de biotecnologia por campaña
+
+```{r}
+rr_sum <- dat %>% 
+  filter(!regional == "La Carlota") %>% 
+  group_by(zona, campana, tecno_rr) %>%
+  summarise(lotes = n()) %>%
+  # group_by(zona, campana, tecno_rr) %>%
+  # summarise(lotes = n()) %>%
+  group_by(zona, campana) %>%
+  mutate(perc = lotes/sum(lotes)) %>%
+  separate(campana, c("year",NA), "/") %>% 
+  ungroup()
+```
+
+```{r}
+rr_sum %>% 
+  drop_na(tecno_rr) %>% 
+  ggplot(aes(x = factor(year), 
+             y = perc*100, 
+             col = factor(tecno_rr), 
+             group =factor(tecno_rr)))+
+  geom_line()+
+  facet_grid(.~zona,  scales="free")  +
+  labs(x = NULL, col=NULL, y = "% del área de cada zona", 
+       title = "Evolucion de superficie de adopción de biotecnología RR por zona")+
+  ggrepel::geom_text_repel(
+    data = rr_sum %>% filter(year == 2019),
+    aes(label = tecno_rr),
+    size =3, 
+    nudge_x = 0.1) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  guides(col = "none")+
+  theme_bw()
+
+ggsave(last_plot(), file = "plots/evolucion_RR.png", width = 7, height = 4)
+# gs4_auth()
+# sheet_write(bio_sum, ss = soja, sheet = "var_x_bio")
+```
+
+```{r}
+sts_sum <- 
+  dat %>% 
+  filter(!regional == "La Carlota") %>% 
+  group_by(zona, campana, tecno_sts) %>%
+  summarise(lotes = n()) %>%
+  # group_by(zona, campana, tecno_rr) %>%
+  # summarise(lotes = n()) %>%
+  group_by(zona, campana) %>%
+  mutate(perc = lotes/sum(lotes)) %>%
+  separate(campana, c("year",NA), "/") %>% 
+  ungroup()
+```
+
+```{r}
+sts_sum %>% 
+  filter(!tecno_sts== "NO OMG") %>% 
+  drop_na(tecno_sts) %>% 
+  ggplot(aes(x = factor(year), 
+             y = perc*100, 
+             col = zona, 
+             group =zona))+
+  geom_line()+
+  labs(x = NULL, y = "% del área de cada zona", 
+       title = "Evolucion de superficie de soja STS por zona")+
+  guides(col="none")+
+  ggrepel::geom_text_repel(
+    data = sts_sum %>% 
+      filter(year == 2019, 
+             !tecno_sts== "NO OMG") %>% 
+      drop_na(tecno_sts),
+    aes(label = paste0("Zona ", zona)), size =3, nudge_x = 0.1) +
+  theme_bw()
+  # theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  
+ggsave(last_plot(), file = "plots/evolucion_STS.png", w =6, h=3)
+```
+
+# Intacta 
+
+```{r}
+dat %>% 
+  # filter(!intacta %in% c(0, "OTRO", "OTROS")) %>%
+  drop_na(intacta) %>% 
+  janitor::tabyl(intacta, zona, campana)  
+
+intacta_sum <- 
+  dat %>% 
+  filter(!regional == "La Carlota") %>% 
+  group_by(zona, campana, intacta) %>%
+  summarise(lotes = n()) %>%
+  # group_by(zona, campana, tecno_rr) %>%
+  # summarise(lotes = n()) %>%
+  group_by(zona, campana) %>%
+  mutate(perc = lotes/sum(lotes)) %>%
+  separate(campana, c("year",NA), "/") %>% 
+  ungroup()
+```
+
+```{r}
+intacta_sum %>% 
+  filter(!tecno_sts== "NO OMG") %>% 
+  drop_na(tecno_sts) %>% 
+  ggplot(aes(x = factor(year), 
+             y = perc*100, 
+             col = zona, 
+             group =zona))+
+  geom_line()+
+  labs(x = NULL, y = "% del área de cada zona", 
+       title = "Evolucion de superficie de soja STS por zona")+
+  guides(col="none")+
+  ggrepel::geom_text_repel(
+    data = sts_sum %>% 
+      filter(year == 2019, 
+             !tecno_sts== "NO OMG") %>% 
+      drop_na(tecno_sts),
+    aes(label = paste0("Zona ", zona)), size =3, nudge_x = 0.1) +
+  theme_bw()
+  # theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  
+ggsave(last_plot(), file = "plots/evolucion_STS.png", w =6, h=3)
+```
+
+```{r}
+dat %>% 
+  filter(!antecesor %in% c(0, "OTRO", "OTROS")) %>%
+  drop_na(antecesor) %>% 
+  janitor::tabyl(antecesor, zona, campana)  
+
+dat %>% 
+  filter(!regional == "La Carlota") %>% 
+  filter(!antecesor %in% c(0, "OTRO", "OTROS")) %>%
+  drop_na(antecesor) %>% 
+  mutate(antecesor2 = case_when(antecesor %in% c("CC", "CS GRAMINEA", "CS LEGUMINOSA") ~ "CS",
+                                TRUE ~ antecesor)) %>% 
+  group_by(zona, campana, antecesor2) %>%
+  summarise(lotes = n()) %>%
+  group_by(zona, campana) %>%
+  mutate(porcentaje = (lotes/sum(lotes))*100) %>%
+  separate(campana, c("year",NA), "/") %>% 
+  ungroup() -> CS_evol
+
+sheet_write(CS_evol, ss = soja, sheet = "CS_evol")
+
+CS_evol %>%  
+  filter(antecesor2== "CS") %>% droplevels("antecesor2") %>% 
+  ggplot(aes(x = factor(year), 
+             y = porcentaje, 
+             col = zona, 
+             group =zona))+
+  geom_point()+geom_line()+
+  labs(x = NULL, y = "% del área de cada zona", 
+       title = "Evolución de lotes de cultivos de servicio (% de zona)")+ 
+  guides(col="none")+
+  ggrepel::geom_text_repel(
+    data = CS_evol %>% 
+      filter(year == 2019,
+             antecesor2== "CS"),  
+    aes(label = paste0("Zona ", zona)), size =3, nudge_x = 0.1, fontface = 3) +
+  # ggrepel::geom_text_repel(data = CS_evol %>% 
+  #                            filter(antecesor2== "CS"),   
+  #                          aes(label = lotes), size =3, nudge_x = -0.1) +
+  theme_bw()+ 
+  expand_limits(y = 0)
+# theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+
+ggsave(last_plot(), file = "plots/evolucion_CS.png", w =5, h=3)
+
+```
+
+ 
+```{r}
+dat %>% 
+  # filter(!intacta %in% c(0, "OTRO", "OTROS")) %>%
+  drop_na(fungicida) %>% 
+  janitor::tabyl(fungicida, campana, zona)
+
+dat_fungi <- dat %>%
+  drop_na(fungicida) %>%
+  group_by(zona, campana, cultivo) %>%
+  summarise(n_lotes = sum(fungicida),
+            tot_lotes = sum(!is.na(fungicida)),
+            prop_lotes =  100*(n_lotes/tot_lotes))
+
+dat_fungi %>%
+  mutate(
+    cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) %>% 
+  ggplot(aes(x = campana, 
+             y = prop_lotes, 
+             col = zona, 
+             group =zona))+
+  geom_line()+
+  labs(x = NULL, y = "% del área de cada zona", 
+title = "Evolución de aplicaciones de fungicidas")+
+  guides(col="none")+
+facet_wrap(~cultivo)+
+theme_bw(base_size = 12)+
+ggrepel::geom_text_repel(data = 
+                           dat_fungi %>%
+                           mutate(cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) %>% filter(campana == "2019/20"),
+                         aes(label = paste0("Zona ", zona)), size =3, nudge_x = 0.1, fontface = 3) 
+# aes(label = paste0(n_lotes,'/', tot_lotes)), size =3),
+
+ggsave(last_plot(), file = "plots_superficies/uso_fungicidas.png", w =5, h=3)
+```
+
+```{r}
+dat %>% 
+  # filter(!intacta %in% c(0, "OTRO", "OTROS")) %>%
+  drop_na(n_insecti) %>% 
+  janitor::tabyl(n_insecti, campana, zona)
+
+dat_insec <- dat %>%
+  drop_na(n_insecti) %>%
+  group_by(zona, campana, cultivo, n_insecti) %>%
+  summarise(n_lotes = n()) %>% 
+  group_by(zona, campana, cultivo) %>%
+  mutate(tot_lotes = sum(n_lotes),
+         prop_lotes =  100*(n_lotes/tot_lotes)) 
+
+dat_insec %>%
+  mutate(
+    cultivo = recode(cultivo, soja_1 = "Soja 1°", soja_2 = "Soja 2°")) %>% 
+  ggplot(aes(y = prop_lotes, x = campana, fill = factor(n_insecti),
+             label = paste0(round(prop_lotes), "%")))+
+  geom_bar(stat="identity", color = "black")+
+  labs(x = NULL, y = "% del área de cada zona", 
+       title = "Uso de insecticidas",
+       fill = "Nro de aplicaciones")+
+  facet_grid(zona~cultivo)+
+  scale_fill_viridis_d(begin = 0.25, end =1, direction = -1)+
+  geom_text(position = position_stack(vjust = .5), 
+            col = "white", fontface = "bold", size = 2.5)+
+  theme_bw(base_size = 9)+
+  theme(legend.position = "top", legend.justification = "right", 
+        plot.title = element_text(family = 'Helvetica',
+                                  face = 'bold',
+                                  vjust = -8))
+
+ggsave(last_plot(), file = "plots_superficies/uso_insecticidas.png", w =6, h=5)
+```
+

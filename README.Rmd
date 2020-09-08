@@ -10,148 +10,80 @@ knitr::opts_chunk$set(
   comment = "#>",
   out.width = "50%")
 library(knitr)
+library(magrittr)
 ```
 
 - [Distribución de superficie](#distribuci-n-de-superficie)
-  <!-- * [Soja 1era / soja 2°](#soja-1era---soja-2-) -->
-  <!-- * [Grupos de madurez](#grupos-de-madurez) -->
-  <!-- * [Biotecnologías](#biotecnolog-as) -->
-- [Manejo](#manejo)
-  <!-- * [Fecha de siembra](#fecha-de-siembra) -->
-  <!-- * [Cultivo antecesor](#cultivo-antecesor) -->
-  <!-- * [Fósforo](#f-sforo) -->
-- [Variedades](#variedades)
-  <!-- * [Superficie](#superficie) -->
-  <!-- * [Performance](#performance) -->
+  - Soja 1era / soja 2°
+  - Grupos de madurez 
+  - Biotecnologías semillas
+  - Uso fungicidas
+  - Uso insecticidas
+  
+- [Manejo 1](#manejo-1)
 
-[Carpeta con Figuras](https://github.com/juanchiem/soybean/tree/master/plots)
+  - Fecha de siembra 
 
+- [Manejo 2](#manejo-2)
+
+  - Cultivo antecesor 
+  - Fósforo
+
+- [Adversidades](#adversidades)
+
+  - Malezas
+  
+- [Cultivares](#cultivares)
+  
 [Link a datos](https://github.com/juanchiem/soybean/tree/master/data) 
 
 # Distribución de superficie
 
-sup_campana_zona.png
-![](plots/sup_campana_zona.png)
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_superficie) 
 
-## Soja 1era / soja 2°
-
-sup_sj.png
-![](plots/sup_sj.png)
-
-## Grupos de madurez
-
-tortas_soja_GM.png
-![](plots/tortas_soja_GM.png)
-
-sup_sj1.png
-![](plots/sup_sj1.png)
-
-sup_sj1_GM3.png
-![](plots/sup_sj1_GM3.png)
-
-sup_sj1_GM4.png
-![](plots/sup_sj1_GM4.png)
-
-sup_sj1_GM5.png
-![](plots/sup_sj1_GM5.png)
-
-sup_sj1_GM6.png
-![](plots/sup_sj1_GM6.png)
-
-sup_sj2.png
-![](plots/sup_sj2.png)
-
-## Biotecnologías 
-
-evolucion_RR.png
-![](plots/evolucion_RR.png)
-
-
-evolucion_STS.png
-![](plots/evolucion_STS.png)
-
-# Manejo
-
-## Lote medio de cada zona  (2017-2020)
-
-```{r lotes_tipicos}
-lotes_tipicos <- list.files("plots", pattern = "lote_tipico", full.names = TRUE)
-include_graphics(lotes_tipicos)
-print(opts_current$get()$label)
+```{r, out.width = "400px"}
+plots_superficies <- paste0(here::here(), "/plots_superficies/", "*.png")
+Sys.glob(plots_superficies)
+Sys.glob(plots_superficies) %>% include_graphics(.)
 ```
 
-## Fecha de siembra
+# Manejo 1
 
-ventanas_siembra_campana.png
-![](plots/ventanas_siembra_campana.png)
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_manejo1) 
 
-### Soja 1° 
+```{r, out.width = "400px"}
+plots_manejo1 <- paste0(here::here(), "/plots_manejo1/", "*.png")
+Sys.glob(plots_manejo1)
+Sys.glob(plots_manejo1) %>% include_graphics(.)
+```
 
-ventanas_siembra_sj1_GM.png
-![](plots/ventanas_siembra_sj1_GM.png)
+# Manejo 2
 
-ventanas_siembra_sj1_GM_campana.png
-![](plots/ventanas_siembra_sj1_GM_campana.png)
-
-### Soja 2° 
-
-ventanas_siembra_sj2.png
-![](plots/ventanas_siembra_sj2.png)
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_manejo2) 
 
 
-## Rendimientos por fecha de siembra x zona
+```{r, out.width = "400px"}
+plots_manejo2 <- paste0(here::here(), "/plots_manejo2/", "*.png")
+Sys.glob(plots_manejo2)
+Sys.glob(plots_manejo2) %>% include_graphics(.)
+```
 
-sj1_rinde_x_GM_zona_campana.png
-![](plots/sj1_rinde_x_GM_zona_campana.png)
+# Adversidades
 
-## Rendimientos por fecha de siembra x zona
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_adversidades) 
 
-(El suavizado de la tendencia esta hecho con modelo polinomial de grado 2, o sea que puede ser lineal o cuadratico el ajuste)
+```{r, out.width = "400px"}
+plots_adversidades <- paste0(here::here(), "/plots_adversidades/", "*.png")
+Sys.glob(plots_adversidades)
+Sys.glob(plots_adversidades) %>% include_graphics(.)
+```
 
-### Soja 1°
+# Cultivares
 
-rinde_Fsiembra_sj1.png
-![](plots/rinde_Fsiembra_sj1.png)
+[Link carpeta](https://github.com/juanchiem/soybean/tree/master/plots_cultivares) 
 
-### Soja 2°
-
-rinde_Fsiembra_sj2.png
-![](plots/rinde_Fsiembra_sj2.png)
-
-## Cultivo antecesor
-
-### Con efecto napa
-
-efecto_antecesor_napa.png
-![](plots/efecto_antecesor_napa.png)
-
-### Sin efecto napa
-
-efecto_antecesor.png
-![](plots/efecto_antecesor.png)
-
-## Fósforo
-
-fosforo_respuesta.png
-![](plots/fosforo_respuesta.png)
-
-fosforo_dosis.png
-![](plots/fosforo_dosis.png)
-
-balance_fosforo.png
-![](plots/balance_fosforo.png)
-
-fosforo_respuesta12.png
-![](plots/fosforo_respuesta12.png)
-
-fosforo_respuesta18.png
-![](plots/fosforo_respuesta18.png)
-
-# Variedades
-
-## Potencial ambiente
-
-potencial_ambiente.png
-![](plots/potencial_ambiente.png)
-
-[Soja 1° - rinde de variedades mas sembradas por zona](https://docs.google.com/spreadsheets/d/1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c/edit#gid=285024912)
+```{r, out.width = "400px"}
+plots_cultivares <- paste0(here::here(), "/plots_cultivares/", "*.png")
+Sys.glob(plots_cultivares) 
+Sys.glob(plots_cultivares) %>% include_graphics(.)
+```

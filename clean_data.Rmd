@@ -22,7 +22,7 @@ raw_dat <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1YL6vwgVu1
 gs4_auth()
 soja <- gs4_get("1YL6vwgVu1nyMuZLRZw5uMav7cMt2mDXd7mI2S8Q6Q7c")
 gs4_browse(soja)
-raw_dat <- read_sheet(soja, sheet = "raw")
+raw_dat <- read_sheet(soja, sheet = "raw",   guess_max = 10000)
 raw_dat <- janitor::clean_names(raw_dat)
 ```
 
@@ -56,7 +56,8 @@ dat <- raw_dat %>%
          adversidad_1, 
          dano_1 = percent_estimados_de_dano, adversidad_2, 
          dano_2 = percent_estimados_de_dano1, 
-         fungicida) %>%  
+         fungicida,
+         n_insecti = n_de_aplicaciones_insecticidas) %>%  
   # filter(rinde > 10) %>%
   mutate(
     campana = as.factor(campana),
@@ -89,7 +90,8 @@ dat <- raw_dat %>%
     tecno_sts = str_to_upper(gsub(',', '\\.', tecno_sts))) %>% 
   mutate(riego = str_to_upper(gsub(',', '\\.', riego)))  %>%
   mutate(napa = str_to_upper(gsub(',', '\\.', napa)),
-         fungicida = case_when(fungicida == "SI" ~ 1, TRUE ~ 0)) 
+         fungicida = case_when(fungicida == "SI" ~ 1, TRUE ~ 0)) %>% 
+  mutate(n_insecti = as.numeric(as.character(n_insecti))) 
 
 # mutate(semillero = str_to_upper(gsub(',', '\\.', semillero))) %>% 
 # mutate(id_row = 1:nrow(.))
