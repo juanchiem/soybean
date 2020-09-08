@@ -7,8 +7,8 @@ editor_options:
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 pacman::p_load(tidyverse) 
-# dat <- read_csv(here::here("data/clean_data.csv"))
-load(here::here("soy_dat.Rdata"))
+load(here::here("data/soy_dat.Rdata"))
+source('~/Documents/soybean/themes.R')
 ```
 
 Cuanto fue el potencial del rendimiento en cada ambiente (zona/año)
@@ -38,11 +38,12 @@ potencial_ambiente %>%
   facet_grid(. ~ campana)+
   # theme(axis.text.x = element_text(angle = 60, hjust = 1))+
   theme_bw()+
-  labs(x = "Zona agroecológica", y = "Potencial de rendimiento - 95°(qq/ha)",
-       fill = "")
+  labs(x = "Zona agroecológica", y = "qq/ha",
+       title = "Potencial de rendimiento\n(95 percentil)", 
+       fill = "")+
+  theme_dens1
 
-ggsave(last_plot(), file = "plots/potencial_ambiente.png", width = 5, height = 3)
-
+ggsave(last_plot(), file = "plots_cultivares/potencial_ambiente.png", w=5, h=4)
 ```
 
 ```{r}
@@ -50,7 +51,6 @@ dat1 <- left_join(x=dat, y=potencial_ambiente,
                      by=c("campana", "zona",  "cultivo")) %>%
   mutate_if(is.character, as.factor) %>% 
   mutate(razon_rinde = rinde/rinde_50) 
-
 ```
 
 
